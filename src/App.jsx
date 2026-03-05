@@ -248,7 +248,7 @@ const NAV = [
   {id:"cotizador",label:"Cotizador",icon:DollarSign},
   {id:"cuentas",label:"Cuentas",icon:Building2},
   {id:"facturas",label:"Facturación",icon:FileText},
-  {id:"rutas",label:"Rutas",icon:Route},
+  {id:"rutas", label:"Rutas", icon:MapPin
   {id:"entregas",label:"Entregas",icon:Package},
 ];
 
