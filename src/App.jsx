@@ -404,7 +404,7 @@ function Dashboard({ setView, cotizaciones, facturas, entregas }) {
             {[
               {label:"Cotizador inteligente",sub:"1 servicio ó 10,000 PDV",icon:DollarSign,color:T.accent,v:"cotizador"},
               {label:"Cuentas & clientes",sub:"Gestión de contratos",icon:Building2,color:T.blue,v:"cuentas"},
-              {label:"Rutas nacionales",sub:"Planificador por célula",icon:Route,color:T.violet,v:"rutas"},
+              {label:"Rutas nacionales",sub:"Planificador por célula",icon:MapPin, color:T.violet, v:"rutas"},
               {label:"Seguimiento entregas",sub:"Evidencia fotográfica",icon:Package,color:T.green,v:"entregas"},
             ].map(({label,sub,icon:Icon,color,v})=>(
               <button key={v} onClick={()=>setView(v)}
