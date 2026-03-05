@@ -7,7 +7,7 @@ import {
 import {
   Truck, Package, FileText, LayoutDashboard, DollarSign, BarChart3,
   Plus, Search, X, ChevronRight, Check, Minus, MapPin, Clock,
-  CheckCircle, Download, Send, Route, Globe,
+  CheckCircle, Download, Send,  Globe,
   FileUp, Layers, Target, Camera, Navigation, Building2,
   RefreshCw, MoreHorizontal, Edit2, Trash2, AlertCircle
 } from "lucide-react";
