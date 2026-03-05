@@ -1162,7 +1162,7 @@ function Cotizador({onSaved}){
           )}
         </div>
       </div>
-      </div>{/* end padding wrapper */}
+      </div>
     </div>
   );
 }
