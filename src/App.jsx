@@ -36,11 +36,11 @@ const db = getFirestore(fbApp);
    DESIGN TOKENS
 ═══════════════════════════════════════════════════════════════════════════ */
 const T = {
-  bg: "#f0f3fa", surface: "#ffffff", card: "#ffffff",
-  sidebar: "#0c1220", sidebarBorder: "#1e2d42",
-  border: "#e2e8f4", border2: "#c8d4e8",
-  text: "#0d1b2e", muted: "#5e7291", mutedLight: "#94a8bc",
-  accent: "#f97316", accentDim: "#fff4ec",
+  bg: "#f2f5fb", surface: "#ffffff", card: "#ffffff",
+  sidebar: "#0a1628", sidebarBorder: "#16253d",
+  border: "#eaeff8", border2: "#d5def0",
+  text: "#0c1829", muted: "#5d7082", mutedLight: "#93a8bc",
+  accent: "#f97316", accentDim: "#fff7f0",
   blue: "#2563eb", blueDim: "#eff6ff",
   green: "#059669", greenDim: "#f0fdf4",
   violet: "#7c3aed", violetDim: "#f5f3ff",
@@ -55,37 +55,32 @@ const T = {
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800;12..96,900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:${T.bg};font-family:${T.sans};color:${T.text}}
-::-webkit-scrollbar{width:5px;height:5px}
+body{background:#f2f5fb;font-family:'Plus Jakarta Sans',sans-serif;color:#0c1829;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:${T.border2};border-radius:8px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar-thumb{background:#d5def0;border-radius:8px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-@keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
-.au{animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both}
-.au2{animation:fadeUp .4s .07s cubic-bezier(.22,1,.36,1) both}
-.au3{animation:fadeUp .4s .14s cubic-bezier(.22,1,.36,1) both}
-.au4{animation:fadeUp .4s .21s cubic-bezier(.22,1,.36,1) both}
-.ai{animation:fadeIn .3s ease both}
-.si{animation:slideIn .3s ease both}
-.pi{animation:popIn .25s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.au{animation:fadeUp .35s cubic-bezier(.22,1,.36,1) both}
+.au2{animation:fadeUp .35s .07s cubic-bezier(.22,1,.36,1) both}
+.au3{animation:fadeUp .35s .14s cubic-bezier(.22,1,.36,1) both}
+.ai{animation:fadeIn .25s ease both}
+.si{animation:slideIn .25s ease both}
+.pi{animation:popIn .2s cubic-bezier(.34,1.56,.64,1) both}
 .spin{animation:spin 1s linear infinite}
-.btn{transition:all .15s ease;cursor:pointer}
-.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn{transition:all .13s ease;cursor:pointer}
+.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
 .btn:active{transform:translateY(0);filter:brightness(.97)}
-.card-h{transition:all .2s ease}
-.card-h:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(13,27,46,.1)}
-.fade-row{transition:background .12s}
-.fade-row:hover{background:#f8fafd!important}
-input:focus,textarea:focus,select:focus{outline:2px solid ${T.accent}!important;outline-offset:0px}
-@media print{
-  .no-print{display:none!important}
-  .print-only{display:block!important}
-  body{background:white}
-}
+.card-h{transition:box-shadow .18s,transform .18s}
+.card-h:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(12,24,41,.09)!important}
+.fade-row{transition:background .1s}
+.fade-row:hover{background:#f8faff!important}
+input,textarea,select{font-family:'Plus Jakarta Sans',sans-serif;color:#0c1829}
+input:focus,textarea:focus,select:focus{outline:2px solid #f97316;outline-offset:-1px;border-color:#f97316!important}
+@media print{.no-print{display:none!important}body{background:white}}
 `;
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -159,12 +154,13 @@ const TARIFA = [
   {c:"Zamora",km:430,eur:13108,cam:18628,kra:20491,rab:24561,mud:33116},
 ];
 
+// TARIFARIO LOCAL OFICIAL 2026 — verificado con captura de pantalla
 const LOCALES = {
-  eur:{normal:2500,ayudante:3000,urgente:3500,resguardo:1800,renta_dia:1600,renta_chofer:3500},
-  cam:{normal:3200,ayudante:4300,urgente:4300,resguardo:3200,renta_dia:2800,renta_chofer:5800},
-  kra:{normal:3600,ayudante:5000,urgente:5000,resguardo:3600},
-  rab:{normal:6000,ayudante:8000,urgente:8000,resguardo:6000},
-  mud:{normal:8000,ayudante:10000,urgente:10000,resguardo:8000},
+  eur:{normal:2500, ayudante:3000, urgente:2500, urgente_ay:3000, resguardo:1800, renta_dia:1600, renta_chofer:3500, renta_mes:36000},
+  cam:{normal:3200, ayudante:4300, urgente:3200, urgente_ay:4300, resguardo:3200, renta_dia:2800, renta_chofer:5800, renta_mes:63000},
+  kra:{normal:3600, ayudante:5000, urgente:3600, urgente_ay:5000, resguardo:3600},
+  rab:{normal:6000, ayudante:8000, urgente:6000, urgente_ay:8000, resguardo:6000},
+  mud:{normal:8000, ayudante:10000,urgente:8000, urgente_ay:10000,resguardo:8000},
 };
 
 const VEHICULOS = [
@@ -351,7 +347,7 @@ function Chip({color=T.accent,icon:Icon,children,onClick}){
 
 function KpiCard({icon:Icon,color,label,value,sub,trend,onClick}){
   return(
-    <div onClick={onClick} className="card-h au" style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:18,padding:"22px 24px",cursor:onClick?"pointer":"default"}}>
+    <div onClick={onClick} className="card-h au" style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,padding:"22px 24px",cursor:onClick?"pointer":"default"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
         <div style={{width:40,height:40,borderRadius:12,background:`${color}14`,display:"flex",alignItems:"center",justifyContent:"center"}}>
           <Icon size={18} color={color}/>
@@ -380,7 +376,7 @@ function Toast({msg,type="ok",onClose}){
   useEffect(()=>{const t=setTimeout(()=>onClose&&onClose(),3500);return()=>clearTimeout(t);},[]);
   const c=type==="err"?T.rose:T.green;
   return(
-    <div className="pi" style={{position:"fixed",top:20,right:24,zIndex:9999,background:T.card,border:`1px solid ${c}40`,borderRadius:14,padding:"12px 20px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 40px rgba(0,0,0,.14)",fontFamily:T.sans,fontSize:13,color:T.text,minWidth:280,maxWidth:400}}>
+    <div className="pi" style={{position:"fixed",top:20,right:24,zIndex:9999,background:"#ffffff",border:`1px solid ${c}40`,borderRadius:14,padding:"12px 20px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 40px rgba(0,0,0,.14)",fontFamily:T.sans,fontSize:13,color:T.text,minWidth:280,maxWidth:400}}>
       <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0,boxShadow:`0 0 8px ${c}`}}/>
       <span style={{flex:1}}>{msg}</span>
       <button onClick={onClose} style={{border:"none",background:"transparent",color:T.muted,cursor:"pointer",padding:0}}><X size={14}/></button>
@@ -407,11 +403,11 @@ function Input({label,hint,...props}){
   const [focused,setFocused]=useState(false);
   return(
     <div>
-      {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</label>}
+      {label&&<label style={{display:"block",fontSize:10,fontWeight:700,color:T.muted,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</label>}
       <input {...props}
         onFocus={e=>{setFocused(true);props.onFocus&&props.onFocus(e);}}
         onBlur={e=>{setFocused(false);props.onBlur&&props.onBlur(e);}}
-        style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${focused?T.accent:T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",transition:"border-color .15s",...props.style}}/>
+        style={{width:"100%",background:"#ffffff",border:`1.5px solid ${focused?T.accent:T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",transition:"border-color .15s",boxShadow:focused?`0 0 0 3px ${T.accent}14`:"none",...props.style}}/>
       {hint&&<div style={{fontSize:11,color:T.mutedLight,marginTop:4}}>{hint}</div>}
     </div>
   );
@@ -421,7 +417,7 @@ function Textarea({label,...props}){
   return(
     <div>
       {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</label>}
-      <textarea {...props} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",resize:"vertical",minHeight:80,...props.style}}/>
+      <textarea {...props} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",resize:"vertical",minHeight:80,...props.style}}/>
     </div>
   );
 }
@@ -430,7 +426,7 @@ function Select({label,options,value,onChange,style}){
   return(
     <div style={style}>
       {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</label>}
-      <select value={value} onChange={onChange} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",cursor:"pointer"}}>
+      <select value={value} onChange={onChange} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",cursor:"pointer"}}>
         {options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}
       </select>
     </div>
@@ -444,7 +440,7 @@ function Stepper({label,value,onChange,min=0,max=9999,step=1}){
       <div style={{display:"flex",alignItems:"center",gap:6}}>
         <button onClick={()=>onChange(Math.max(min,value-step))} className="btn" style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><Minus size={13}/></button>
         <input type="number" value={value} onChange={e=>onChange(Math.min(max,Math.max(min,Number(e.target.value)||min)))}
-          style={{width:72,textAlign:"center",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"6px 4px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+          style={{width:72,textAlign:"center",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"6px 4px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
         <button onClick={()=>onChange(Math.min(max,value+step))} className="btn" style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><Plus size={13}/></button>
       </div>
     </div>
@@ -453,9 +449,9 @@ function Stepper({label,value,onChange,min=0,max=9999,step=1}){
 
 function Toggle({checked,onChange,label,sub,accent=T.accent}){
   return(
-    <button onClick={()=>onChange(!checked)} className="btn" style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,border:`1.5px solid ${checked?accent:T.border2}`,background:checked?`${accent}0d`:"transparent",cursor:"pointer",width:"100%",textAlign:"left",transition:"all .15s"}}>
-      <div style={{width:22,height:22,borderRadius:"50%",flexShrink:0,border:`2px solid ${checked?accent:T.border2}`,background:checked?accent:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s"}}>
-        {checked&&<Check size={12} color="#fff"/>}
+    <button onClick={()=>onChange(!checked)} className="btn" style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,border:`1.5px solid ${checked?accent:T.border2}`,background:checked?`${accent}08`:"#ffffff",cursor:"pointer",width:"100%",textAlign:"left",transition:"all .15s",boxShadow:checked?`0 0 0 3px ${accent}12`:"none"}}>
+      <div style={{width:20,height:20,borderRadius:"50%",flexShrink:0,border:`2px solid ${checked?accent:T.border2}`,background:checked?accent:"#fff",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s",boxShadow:checked?`0 2px 8px ${accent}40`:"none"}}>
+        {checked&&<Check size={11} color="#fff"/>}
       </div>
       <div style={{flex:1}}>
         <div style={{fontFamily:T.sans,fontSize:13,fontWeight:600,color:T.text}}>{label}</div>
@@ -487,10 +483,10 @@ function CitySearch({placeholder,value,onChange,onSelect,vehiculo,exclude=[]}){
         <Search size={13} color={T.muted} style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}/>
         <input value={value} onChange={e=>{onChange(e.target.value);setOpen(true);}} onFocus={()=>setOpen(true)}
           placeholder={placeholder||"Buscar ciudad..."}
-          style={{width:"100%",paddingLeft:34,paddingRight:14,paddingTop:10,paddingBottom:10,background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:10,color:T.text,fontFamily:T.sans,fontSize:14,outline:"none"}}/>
+          style={{width:"100%",paddingLeft:34,paddingRight:14,paddingTop:10,paddingBottom:10,background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,color:T.text,fontFamily:T.sans,fontSize:14,outline:"none"}}/>
       </div>
       {open&&value&&filt.length>0&&(
-        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:T.card,border:`1.5px solid ${T.border2}`,borderRadius:14,zIndex:200,maxHeight:260,overflowY:"auto",boxShadow:"0 16px 60px rgba(0,0,0,.15)"}}>
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:14,zIndex:200,maxHeight:260,overflowY:"auto",boxShadow:"0 16px 60px rgba(0,0,0,.15)"}}>
           {filt.slice(0,12).map(t=>(
             <button key={t.c} onClick={()=>{onSelect(t);setOpen(false);onChange("");}}
               className="btn fade-row" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"10px 16px",border:"none",borderBottom:`1px solid ${T.border}`,background:"transparent",cursor:"pointer"}}>
@@ -600,7 +596,7 @@ function Dashboard({setView,cotizaciones,facturas,rutas,entregas}){
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:16,marginBottom:16}}>
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
+        <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
           <div style={{padding:"18px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Facturación {new Date().getFullYear()}</span>
             <Tag color={T.green}>{fmtK(cobrado)} cobrado</Tag>
@@ -621,7 +617,7 @@ function Dashboard({setView,cotizaciones,facturas,rutas,entregas}){
                   </defs>
                   <XAxis dataKey="mes" tick={{fontSize:11,fontFamily:T.sans,fill:T.muted}} axisLine={false} tickLine={false}/>
                   <YAxis hide/>
-                  <Tooltip formatter={(v,n)=>[fmtK(v),n==="facturado"?"Facturado":"Cotizaciones"]} contentStyle={{background:T.card,border:`1px solid ${T.border}`,borderRadius:10,fontFamily:T.sans,fontSize:12}}/>
+                  <Tooltip formatter={(v,n)=>[fmtK(v),n==="facturado"?"Facturado":"Cotizaciones"]} contentStyle={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:10,fontFamily:T.sans,fontSize:12}}/>
                   <Area type="monotone" dataKey="facturado" stroke={T.accent} strokeWidth={2} fill="url(#gA)"/>
                   <Area type="monotone" dataKey="cotizaciones" stroke={T.blue} strokeWidth={2} fill="url(#gB)"/>
                 </AreaChart>
@@ -646,7 +642,7 @@ function Dashboard({setView,cotizaciones,facturas,rutas,entregas}){
         </div>
       </div>
 
-      <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
+      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
         <div style={{padding:"18px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Últimas cotizaciones</span>
           <button onClick={()=>setView("cotizador")} className="btn" style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:T.accent,background:"none",border:"none",cursor:"pointer",fontFamily:T.sans,fontWeight:700}}>Nueva <Plus size={13}/></button>
@@ -744,9 +740,9 @@ function Cotizador({onSaved}){
   /* ── CÁLCULOS LOCAL ── */
   const locD=LOCALES[locVeh];
   let locBase=locD?.normal||0;
-  if(locUrgente&&locAyud)locBase=locD?.urgente||0;
-  else if(locAyud)locBase=locD?.ayudante||0;
-  else if(locUrgente)locBase=locD?.urgente||0;
+  if(locUrgente&&locAyud) locBase=locD?.urgente_ay||locD?.ayudante||0;
+  else if(locAyud)        locBase=locD?.ayudante||0;
+  else if(locUrgente)     locBase=locD?.urgente||0;
   const locXPar=locParadas*ENTREGA_ADIC;
   const locXRes=locResguardo?locD?.resguardo||0:0;
   const locSub=locBase+locXPar+locXRes;
@@ -838,19 +834,29 @@ function Cotizador({onSaved}){
   );
 
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"28px 32px",fontFamily:T.sans}}>
+    <div style={{flex:1,overflowY:"auto",background:"#ffffff",fontFamily:T.sans}}>
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
-      <div className="au" style={{marginBottom:22,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+      {/* TOP BAR */}
+      <div style={{borderBottom:`1px solid ${T.border}`,padding:"20px 36px",background:"#ffffff",position:"sticky",top:0,zIndex:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Cotizador Pro</h1>
-          <p style={{color:T.muted,fontSize:13,marginTop:4}}>El cotizador más completo del sector logístico · Actualización automática en tiempo real</p>
+          <h1 style={{fontFamily:T.display,fontWeight:800,fontSize:24,color:T.text,letterSpacing:"-0.02em"}}>Cotizador Pro</h1>
+          <p style={{color:T.muted,fontSize:12,marginTop:2}}>Actualización automática · Viáticos incluidos · PDF instantáneo</p>
         </div>
-        {step==="preview"&&<button onClick={()=>setStep("form")} className="btn" style={{display:"flex",alignItems:"center",gap:6,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,borderRadius:10,padding:"9px 18px",cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:600}}><RefreshCw size={13}/> Nueva cotización</button>}
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {step==="preview"&&<button onClick={()=>setStep("form")} className="btn" style={{display:"flex",alignItems:"center",gap:6,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,borderRadius:10,padding:"8px 16px",cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:600,whiteSpace:"nowrap"}}><RefreshCw size={12}/>Nueva cotización</button>}
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",background:T.accentDim,borderRadius:20,border:`1px solid ${T.accent}20`}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:T.green,boxShadow:`0 0 6px ${T.green}`}}/>
+            <span style={{fontSize:11,fontWeight:600,color:T.accent,fontFamily:T.mono,letterSpacing:"0.03em"}}>EN VIVO</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{padding:"28px 36px"}}>
       </div>
 
       {/* MODO SELECTOR */}
-      <div style={{display:"flex",background:T.card,border:`1.5px solid ${T.border}`,borderRadius:14,padding:4,width:"fit-content",gap:2,marginBottom:22}}>
+      <div style={{display:"flex",background:"#ffffff",border:`1.5px solid ${T.border}`,borderRadius:14,padding:4,width:"fit-content",gap:2,marginBottom:22}}>
         {[
           {id:"local",label:"📍 Local CDMX",color:T.green},
           {id:"foraneo",label:"🚛 Foráneo",color:T.accent},
@@ -868,8 +874,8 @@ function Cotizador({onSaved}){
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
           {/* CLIENT INFO */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Información del cliente</div>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Información del cliente</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               <Input label="Empresa / Cliente *" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Ej: Walmart México"/>
               <Input label="Nombre de contacto" value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Ej: Luis Hernández"/>
@@ -880,8 +886,8 @@ function Cotizador({onSaved}){
 
           {/* ══ FORÁNEO ══ */}
           {modo==="foraneo"&&<>
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:12}}>Destino <span style={{color:T.rose}}>*</span></div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Destino <span style={{color:T.rose}}>*</span></div>
               {forDest?(
                 <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:`${T.accent}0d`,border:`1.5px solid ${T.accent}28`,borderRadius:12}}>
                   <MapPin size={16} color={T.accent}/>
@@ -896,8 +902,8 @@ function Cotizador({onSaved}){
               )}
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 {VEHICULOS.map(v=>{
                   const a=forVeh===v.k;
@@ -916,7 +922,7 @@ function Cotizador({onSaved}){
               </div>
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
                 <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Viáticos del personal</div>
                 {forDias>0&&<Tag color={T.blue}>{forDias} días fuera · {forNoches} noches hotel</Tag>}
@@ -924,14 +930,14 @@ function Cotizador({onSaved}){
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
                 <div>
                   <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comidas / persona / día</div>
-                  <input type="number" value={forComida} onChange={e=>setForComida(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <input type="number" value={forComida} onChange={e=>setForComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
                 </div>
                 <div>
                   <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel / persona / noche</div>
-                  <input type="number" value={forHotel} onChange={e=>setForHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <input type="number" value={forHotel} onChange={e=>setForHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
                 </div>
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"#f8fafd",borderRadius:10,border:`1px solid ${T.border}`,marginBottom:14}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"#ffffff",borderRadius:10,border:`1px solid ${T.border}`,marginBottom:14}}>
                 <Users size={14} color={T.blue}/>
                 <span style={{flex:1,fontSize:12}}>Tripulación base: <strong>{forVD?.crew||1} persona{(forVD?.crew||1)>1?"s":""}</strong></span>
                 <Stepper value={forPersonasExtra} onChange={setForPersonasExtra} min={0} max={8}/>
@@ -945,8 +951,8 @@ function Cotizador({onSaved}){
               )}
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Servicios adicionales</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Servicios adicionales</div>
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 <Toggle checked={forUrgente} onChange={setForUrgente} label="⚡ Viaje urgente" sub={forUrgente?`+35% → +${fmt(forXUrg)}`:"Sin cargo adicional"} accent={T.rose}/>
                 <Toggle checked={forManiobra} onChange={setForManiobra} label="💪 Maniobras / Ayudantes en destino" sub="$2,800 por ayudante" accent={T.violet}/>
@@ -963,8 +969,8 @@ function Cotizador({onSaved}){
 
           {/* ══ LOCAL ══ */}
           {modo==="local"&&<>
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 {VEHICULOS.map(v=>{
                   const a=locVeh===v.k;const tar=LOCALES[v.k];
@@ -979,8 +985,8 @@ function Cotizador({onSaved}){
                 })}
               </div>
             </div>
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Servicios</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Servicios</div>
               <div style={{display:"flex",flexDirection:"column",gap:8}}>
                 <Toggle checked={locUrgente} onChange={setLocUrgente} label="⚡ Viaje urgente" sub={`${fmt(LOCALES[locVeh]?.urgente||0)} tarifa urgente`} accent={T.rose}/>
                 <Toggle checked={locAyud} onChange={setLocAyud} label="💪 Con ayudante / maniobras" sub={`${fmt(LOCALES[locVeh]?.ayudante||0)} con ayudante`} accent={T.violet}/>
@@ -996,19 +1002,19 @@ function Cotizador({onSaved}){
 
           {/* ══ MASIVO ══ */}
           {modo==="masivo"&&<>
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Puntos de Distribución</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Puntos de Distribución</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <div>
                   <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Total de PDVs</div>
-                  <input type="number" value={masPDV} onChange={e=>setMasPDV(Math.max(1,parseInt(e.target.value)||1))} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"10px 12px",color:T.accent,fontFamily:T.mono,fontSize:22,fontWeight:700,outline:"none",textAlign:"center"}}/>
+                  <input type="number" value={masPDV} onChange={e=>setMasPDV(Math.max(1,parseInt(e.target.value)||1))} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"10px 12px",color:T.accent,fontFamily:T.mono,fontSize:22,fontWeight:700,outline:"none",textAlign:"center"}}/>
                 </div>
                 <Stepper label="Plazo máximo (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
               </div>
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Configuración de flota</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Configuración de flota</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
                 <Stepper label="Entregas máx/camioneta/día" value={masMaxDia} onChange={setMasMaxDia} min={1} max={300}/>
                 <Stepper label="Personas por camioneta" value={masPersonasVan} onChange={setMasPersonasVan} min={1} max={5}/>
@@ -1023,8 +1029,8 @@ function Cotizador({onSaved}){
               <Toggle checked={masUrgente} onChange={setMasUrgente} label="⚡ Servicio urgente (+35%)" sub="Aplica sobre tarifa de transporte" accent={T.rose}/>
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Tipo de distribución</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Tipo de distribución</div>
               <div style={{display:"flex",gap:8,marginBottom:14}}>
                 <button onClick={()=>setMasLocal(true)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:`2px solid ${masLocal?T.accent:T.border2}`,background:masLocal?`${T.accent}0d`:"transparent",color:masLocal?T.accent:T.muted,cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:masLocal?700:500}}>📍 Local / Una ciudad</button>
                 <button onClick={()=>setMasLocal(false)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:`2px solid ${!masLocal?T.accent:T.border2}`,background:!masLocal?`${T.accent}0d`:"transparent",color:!masLocal?T.accent:T.muted,cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:!masLocal?700:500}}>🗺️ Foráneo / Viaje</button>
@@ -1049,16 +1055,16 @@ function Cotizador({onSaved}){
               </>}
             </div>
 
-            <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Viáticos del personal</div>
+            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Viáticos del personal</div>
               <div style={{display:"grid",gridTemplateColumns:masLocal?"1fr":"1fr 1fr",gap:12,marginBottom:12}}>
                 <div>
                   <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comida/persona/día</div>
-                  <input type="number" value={masComida} onChange={e=>setMasComida(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <input type="number" value={masComida} onChange={e=>setMasComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
                 </div>
                 {!masLocal&&<div>
                   <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel/persona/noche</div>
-                  <input type="number" value={masHotel} onChange={e=>setMasHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <input type="number" value={masHotel} onChange={e=>setMasHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
                 </div>}
               </div>
               {(masXComida>0||masXHotel>0)&&(
@@ -1071,7 +1077,7 @@ function Cotizador({onSaved}){
           </>}
 
           {/* NOTAS */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
             <Textarea label="Notas / Condiciones especiales" value={notas} onChange={e=>setNotas(e.target.value)} placeholder="Condiciones de carga, tipo de mercancía, instrucciones especiales…"/>
           </div>
 
@@ -1083,12 +1089,13 @@ function Cotizador({onSaved}){
         </div>
 
         {/* ── RIGHT COLUMN: LIVE PREVIEW ── */}
-        <div style={{position:"sticky",top:0}}>
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden",marginBottom:14}}>
-            <div style={{background:"linear-gradient(135deg,#fff7ed,#fef3c7)",padding:"20px 22px",borderBottom:`1px solid ${T.border}`}}>
-              <div style={{fontFamily:T.mono,fontSize:10,color:T.accent,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:6}}>Cotización en vivo</div>
-              <div style={{fontFamily:T.mono,fontWeight:700,fontSize:32,color:T.text,letterSpacing:"-0.02em",lineHeight:1}}>{fmt(total)}</div>
-              <div style={{fontSize:12,color:T.muted,marginTop:4}}>MXN con IVA incluido</div>
+        <div style={{position:"sticky",top:0,paddingTop:4}}>
+          <div style={{background:"#ffffff",border:`1.5px solid ${T.border}`,borderRadius:18,overflow:"hidden",marginBottom:14,boxShadow:"0 4px 24px rgba(12,24,41,.06)"}}>
+            <div style={{background:"#ffffff",padding:"20px 22px 16px",borderBottom:`2px solid ${T.accent}`,position:"relative"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${T.accent},#fb923c)`}}/>
+              <div style={{fontFamily:T.mono,fontSize:10,color:T.accent,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8,marginTop:4}}>● Cotización en vivo</div>
+              <div style={{fontFamily:T.mono,fontWeight:700,fontSize:36,color:T.text,letterSpacing:"-0.03em",lineHeight:1}}>{fmt(total)}</div>
+              <div style={{fontSize:11,color:T.muted,marginTop:5,fontWeight:500}}>MXN con IVA incluido</div>
             </div>
             <div style={{padding:"16px 20px"}}>
               {modo==="foraneo"&&<>
@@ -1138,7 +1145,7 @@ function Cotizador({onSaved}){
           </div>
 
           {step==="preview"&&(
-            <div style={{background:T.card,border:`1.5px solid ${T.accent}28`,borderRadius:16,padding:18,display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{background:"#ffffff",border:`1.5px solid ${T.accent}28`,borderRadius:16,padding:18,display:"flex",flexDirection:"column",gap:10}}>
               <div style={{fontSize:12,fontWeight:700,color:T.accent,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Cotización lista</div>
               <button onClick={handleSave} disabled={saving} className="btn" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:11,padding:"11px 0",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 4px 20px ${T.accent}30`,opacity:saving?.7:1}}>
                 {saving?<><div style={{width:14,height:14,border:"2px solid #fff",borderTop:"2px solid transparent",borderRadius:"50%"}} className="spin"/>Guardando…</> : <><Send size={15}/>Guardar en Firebase</>}
@@ -1155,6 +1162,7 @@ function Cotizador({onSaved}){
           )}
         </div>
       </div>
+      </div>{/* end padding wrapper */}
     </div>
   );
 }
@@ -1300,8 +1308,8 @@ function PlanificadorRutas({onSaved}){
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
           {/* RUTA INFO */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Datos de la ruta</div>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Datos de la ruta</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               <Input label="Nombre de ruta *" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: MTY Noreste Semana 12"/>
               <Input label="Cliente" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Nombre del cliente"/>
@@ -1309,7 +1317,7 @@ function PlanificadorRutas({onSaved}){
           </div>
 
           {/* STOP LIST */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
             <div style={{padding:"16px 22px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Paradas de la ruta ({stops.length})</span>
               <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -1338,12 +1346,12 @@ function PlanificadorRutas({onSaved}){
                         <div>
                           <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>PDVs en esta parada</div>
                           <input type="number" value={stop.pdv||""} onChange={e=>updateStop(stop.id,"pdv",parseInt(e.target.value)||0)}
-                            placeholder="0" style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.accent,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                            placeholder="0" style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.accent,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
                         </div>
                         <div>
                           <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>Dirección / Zona</div>
                           <input type="text" value={stop.addr||""} onChange={e=>updateStop(stop.id,"addr",e.target.value)}
-                            placeholder="Opcional…" style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none"}}/>
+                            placeholder="Opcional…" style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none"}}/>
                         </div>
                       </div>
                     )}
@@ -1374,8 +1382,8 @@ function PlanificadorRutas({onSaved}){
           </div>
 
           {/* VEHICLE & FLEET CONFIG */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:14}}>Vehículo y flota</div>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo y flota</div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
               {VEHICULOS.map(v=>(
                 <button key={v.k} onClick={()=>setVehiculo(v.k)} className="btn" style={{flex:1,minWidth:100,padding:"10px 8px",borderRadius:11,border:`2px solid ${vehiculo===v.k?T.accent:T.border2}`,background:vehiculo===v.k?`${T.accent}0d`:"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
@@ -1402,7 +1410,7 @@ function PlanificadorRutas({onSaved}){
           </div>
 
           {/* VIÁTICOS */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Viáticos del personal</div>
               {diasFuera>0&&<Tag color={T.blue}>{diasFuera} días fuera · {noches} noches</Tag>}
@@ -1410,11 +1418,11 @@ function PlanificadorRutas({onSaved}){
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
               <div>
                 <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comida/persona/día</div>
-                <input type="number" value={comida} onChange={e=>setComida(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                <input type="number" value={comida} onChange={e=>setComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
               </div>
               <div>
                 <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel/persona/noche</div>
-                <input type="number" value={hotel} onChange={e=>setHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#f8fafd",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                <input type="number" value={hotel} onChange={e=>setHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
               </div>
             </div>
             {xViatic>0&&<div style={{padding:"10px 14px",background:`${T.blue}0a`,borderRadius:10,border:`1px solid ${T.blue}20`}}>
@@ -1440,7 +1448,7 @@ function PlanificadorRutas({onSaved}){
         {/* ── RIGHT: SUMMARY + SAVED ROUTES ── */}
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
           {/* COST SUMMARY */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
             <div style={{background:"linear-gradient(135deg,#fff7ed,#fef3c7)",padding:"18px 20px",borderBottom:`1px solid ${T.border}`}}>
               <div style={{fontFamily:T.mono,fontSize:10,color:T.accent,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:6}}>Costo total de ruta</div>
               <div style={{fontFamily:T.mono,fontWeight:700,fontSize:34,color:T.text,lineHeight:1}}>{fmt(total)}</div>
@@ -1468,8 +1476,8 @@ function PlanificadorRutas({onSaved}){
           </div>
 
           {/* ROUTE STOPS SUMMARY */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:18}}>
-            <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:12}}>Resumen de ruta</div>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:18}}>
+            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Resumen de ruta</div>
             {stops.map((s,i)=>(
               <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                 <div style={{width:22,height:22,borderRadius:"50%",background:s.isOrigin?`${T.blue}18`:`${T.accent}18`,border:`2px solid ${s.isOrigin?T.blue:T.accent}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:9,fontWeight:700,color:s.isOrigin?T.blue:T.accent}}>{i+1}</div>
@@ -1487,7 +1495,7 @@ function PlanificadorRutas({onSaved}){
           </div>
 
           {/* SAVED ROUTES */}
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
+          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
             <div style={{padding:"14px 18px",borderBottom:`1px solid ${T.border}`}}>
               <span style={{fontFamily:T.display,fontWeight:700,fontSize:14,color:T.text}}>Rutas guardadas ({rutas.length})</span>
             </div>
@@ -1533,7 +1541,7 @@ function PlanificadorRutas({onSaved}){
         </div>
         <div style={{display:"flex",gap:10}}>
           {viewRuta.mapsURL&&<a href={viewRuta.mapsURL} target="_blank" rel="noopener noreferrer" className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:T.blueDim,border:`1.5px solid ${T.blue}28`,color:T.blue,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontFamily:T.sans,fontWeight:700,fontSize:14}}><Globe size={15}/>Google Maps</a>}
-          <button onClick={()=>{generateQuotePDF({...viewRuta,lines:[{label:"Tarifa transporte",value:fmt(viewRuta.tarifaTransp||0)},{label:"Viáticos",value:fmt(viewRuta.xViatic||0)},{label:"Subtotal",value:fmt(viewRuta.subtotal||0)},{label:"IVA 16%",value:fmt(viewRuta.iva||0)},{label:"TOTAL",value:fmt(viewRuta.total||0),bold:true,color:T.accent}]});}} className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:T.card,border:`1.5px solid ${T.border2}`,cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,color:T.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Printer size={15}/>PDF</button>
+          <button onClick={()=>{generateQuotePDF({...viewRuta,lines:[{label:"Tarifa transporte",value:fmt(viewRuta.tarifaTransp||0)},{label:"Viáticos",value:fmt(viewRuta.xViatic||0)},{label:"Subtotal",value:fmt(viewRuta.subtotal||0)},{label:"IVA 16%",value:fmt(viewRuta.iva||0)},{label:"TOTAL",value:fmt(viewRuta.total||0),bold:true,color:T.accent}]});}} className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:"#ffffff",border:`1.5px solid ${T.border2}`,cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,color:T.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Printer size={15}/>PDF</button>
           <button onClick={async()=>{await updateDoc(doc(db,"rutas",viewRuta.id),{status:viewRuta.status==="En curso"?"Completada":"En curso"});setViewRuta(null);}} className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:`linear-gradient(135deg,${T.accent},#fb923c)`,border:"none",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>{viewRuta.status==="En curso"?<><CheckCircle size={15}/>Completar</>:<><Navigation size={15}/>Iniciar</>}</button>
         </div>
       </Modal>}
@@ -1597,7 +1605,7 @@ function Facturas(){
         ))}
       </div>
 
-      {loading?<Loader/>:<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
+      {loading?<Loader/>:<div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
         {filtered.length===0?<div style={{padding:48,textAlign:"center",color:T.muted,fontSize:13}}>Sin facturas. <button onClick={()=>setModal(true)} style={{color:T.accent,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Crear →</button></div>
         :<table style={{width:"100%",borderCollapse:"collapse"}}>
           <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
@@ -1671,8 +1679,8 @@ function Clientes(){
         <div><h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Clientes</h1><p style={{color:T.muted,fontSize:13,marginTop:4}}>{items.length} cuentas activas</p></div>
         <button onClick={()=>setModal(true)} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"11px 20px",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 4px 20px ${T.accent}30`}}><Plus size={15}/>Nuevo cliente</button>
       </div>
-      <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cliente…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
-      {loading?<Loader/>:<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
+      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cliente…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
+      {loading?<Loader/>:<div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
         {filt.length===0?<div style={{padding:48,textAlign:"center",color:T.muted,fontSize:13}}>Sin clientes. <button onClick={()=>setModal(true)} style={{color:T.accent,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Agregar →</button></div>
         :<table style={{width:"100%",borderCollapse:"collapse"}}>
           <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
@@ -1735,13 +1743,13 @@ function Entregas(){
         </div>
       </div>
       <div style={{display:"flex",gap:12,marginBottom:14}}>
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,flex:1}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar PDV o dirección…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
+        <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,flex:1}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar PDV o dirección…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
       </div>
       {loading?<Loader/>:(
         <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
-          {filt.length===0&&<div style={{padding:40,textAlign:"center",color:T.muted,fontSize:13,background:T.card,border:`1px solid ${T.border}`,borderRadius:14}}>Sin entregas registradas.</div>}
+          {filt.length===0&&<div style={{padding:40,textAlign:"center",color:T.muted,fontSize:13,background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:14}}>Sin entregas registradas.</div>}
           {filt.map((e,i)=>{const col=sc[e.status]||T.muted;return(
-            <div key={e.id||i} className="fade-row card-h" style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:13,padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
+            <div key={e.id||i} className="fade-row card-h" style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:13,padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
               <div style={{width:40,height:40,borderRadius:11,background:`${col}14`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                 {e.status==="Entregado"?<CheckCircle size={17} color={col}/>:e.status==="En tránsito"?<Navigation size={17} color={col}/>:<Clock size={17} color={col}/>}
               </div>
@@ -1759,7 +1767,7 @@ function Entregas(){
           );})}
         </div>
       )}
-      <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
+      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
         <div style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text,marginBottom:16}}>Registrar entrega</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
           <Input label="PDV / Punto de venta *" value={form.pdv} onChange={e=>setForm({...form,pdv:e.target.value})} placeholder="Nombre del PDV"/>
