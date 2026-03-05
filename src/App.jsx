@@ -244,14 +244,13 @@ function Modal({ title, onClose, children, wide }) {
 
 /* ─── SIDEBAR ────────────────────────────────────────────────────────────── */
 const NAV = [
-  {id:"dashboard",label:"Dashboard",icon:LayoutDashboard},
-  {id:"cotizador",label:"Cotizador",icon:DollarSign},
-  {id:"cuentas",label:"Cuentas",icon:Building2},
-  {id:"facturas",label:"Facturación",icon:FileText},
+  {id:"dashboard", label:"Dashboard", icon:LayoutDashboard},
+  {id:"cotizador", label:"Cotizador", icon:DollarSign},
+  {id:"cuentas", label:"Cuentas", icon:Building2},
+  {id:"facturas", label:"Facturación", icon:FileText},
   {id:"rutas", label:"Rutas", icon:MapPin},
-  {id:"entregas",label:"Entregas",icon:Package},
+  {id:"entregas", label:"Entregas", icon:Package},
 ];
-
 function Sidebar({ view, setView, stats }) {
   return (
     <aside style={{width:214,background:T.surface,borderRight:`1px solid ${T.border}`,
