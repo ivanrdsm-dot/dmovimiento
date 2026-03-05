@@ -1209,7 +1209,7 @@ function Rutas() {
                     onMouseLeave={e=>e.currentTarget.style.background=T.card}>
                     <div style={{width:44,height:44,borderRadius:12,background:`${col}14`,
                       display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      <Route size={19} color={col}/>
+                      <MapPin size={19} color={col}/>
                     </div>
                     <div style={{flex:1}}>
                       <div style={{fontFamily:T.sans,fontWeight:700,fontSize:14,color:T.text,marginBottom:2}}>{r.nombre}</div>
