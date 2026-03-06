@@ -4,7 +4,7 @@ import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc,
   doc, onSnapshot, serverTimestamp,
 } from "firebase/firestore";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
 import {
   Truck, Package, FileText, LayoutDashboard, DollarSign, Plus,
   Search, X, Check, Minus, MapPin, Clock, CheckCircle, Send,
@@ -460,18 +460,22 @@ function Dashboard({setView,cots,facts,rutas,entregas}){
             <span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:14}}>Facturación {new Date().getFullYear()}</span>
             <Tag color={GREEN}>{fmtK(facts.filter(f=>f.status==="Pagada").reduce((a,f)=>a+(f.total||0),0))} cobrado</Tag>
           </div>
-          <div style={{padding:"14px 8px 6px"}}>
-            {chartData.length>0
-              ?<ResponsiveContainer width="100%" height={150}>
-                <AreaChart data={chartData}>
-                  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={A} stopOpacity={.22}/><stop offset="95%" stopColor={A} stopOpacity={0}/></linearGradient></defs>
-                  <XAxis dataKey="mes" tick={{fontSize:11,fontFamily:SANS,fill:MUTED}} axisLine={false} tickLine={false}/>
-                  <YAxis hide/>
-                  <Tooltip formatter={v=>[fmtK(v),"Facturado"]} contentStyle={{background:"#fff",border:"1px solid "+BORDER,borderRadius:9,fontFamily:SANS,fontSize:12}}/>
-                  <Area type="monotone" dataKey="fac" stroke={A} strokeWidth={2} fill="url(#g)"/>
-                </AreaChart>
-              </ResponsiveContainer>
-              :<div style={{height:150,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED,fontSize:13}}>Sin datos aún</div>
+          <div style={{padding:"14px 20px 16px"}}>
+            {chartData.length>0&&chartData.some(d=>d.fac>0)
+              ?<div style={{display:"flex",alignItems:"flex-end",gap:6,height:130,paddingTop:10}}>
+                {chartData.map((d,i)=>{
+                  const max=Math.max(...chartData.map(x=>x.fac),1);
+                  const h=d.fac>0?Math.max(8,Math.round((d.fac/max)*100)):4;
+                  return(
+                    <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                      <div style={{fontSize:9,color:MUTED,fontFamily:MONO,fontWeight:700,opacity:d.fac>0?1:0}}>{fmtK(d.fac)}</div>
+                      <div style={{width:"100%",height:h+"%",background:d.fac>0?"linear-gradient(180deg,"+A+",#fb923c)":BORDER,borderRadius:"4px 4px 0 0",transition:"height .3s",minHeight:4}}/>
+                      <div style={{fontSize:10,color:MUTED,fontFamily:SANS}}>{d.mes}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              :<div style={{height:130,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED,fontSize:13}}>Sin datos aún — crea tu primera factura</div>
             }
           </div>
         </div>
@@ -1505,4 +1509,3 @@ export default function App(){
     </>
   );
 }
-
