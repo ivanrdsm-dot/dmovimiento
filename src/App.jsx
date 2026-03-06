@@ -1,26 +1,20 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore, collection, addDoc, updateDoc, deleteDoc,
-  doc, onSnapshot, serverTimestamp, query, orderBy, where,
+  doc, onSnapshot, serverTimestamp,
 } from "firebase/firestore";
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart, Bar,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
   Truck, Package, FileText, LayoutDashboard, DollarSign, Plus,
-  Search, X, Check, Minus, MapPin, Clock, CheckCircle,
-  Download, Send, FileUp, Layers, Building2, RefreshCw, Trash2,
-  Users, Hotel, UtensilsCrossed, Calendar, TrendingUp, Route,
-  Zap, Globe, ArrowRight, Star, AlertCircle, ChevronDown,
-  ChevronUp, BarChart2, Copy, Eye, Navigation, Printer,
-  ChevronRight, Car, Map, PlusCircle, GripVertical,
+  Search, X, Check, Minus, MapPin, Clock, CheckCircle, Send,
+  Layers, Building2, RefreshCw, Trash2, Users, Hotel,
+  UtensilsCrossed, Calendar, TrendingUp, Route, Globe,
+  ArrowRight, AlertCircle, ChevronDown, ChevronUp, BarChart2,
+  Printer, ChevronRight, Navigation,
 } from "lucide-react";
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   FIREBASE
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── FIREBASE ──────────────────────────────────────────────────────────── */
 const firebaseConfig = {
   apiKey: "AIzaSyB7tuRYUEY471IPJdnOB69DI2yKLCU72T0",
   authDomain: "salesflow-crm-13c4a.firebaseapp.com",
@@ -32,61 +26,60 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════════════════════════════════ */
-const T = {
-  bg: "#f2f5fb", surface: "#ffffff", card: "#ffffff",
-  sidebar: "#0a1628", sidebarBorder: "#16253d",
-  border: "#eaeff8", border2: "#d5def0",
-  text: "#0c1829", muted: "#5d7082", mutedLight: "#93a8bc",
-  accent: "#f97316", accentDim: "#fff7f0",
-  blue: "#2563eb", blueDim: "#eff6ff",
-  green: "#059669", greenDim: "#f0fdf4",
-  violet: "#7c3aed", violetDim: "#f5f3ff",
-  rose: "#e11d48", roseDim: "#fff1f2",
-  amber: "#d97706", amberDim: "#fffbeb",
-  teal: "#0891b2", tealDim: "#f0fdff",
-  mono: "'JetBrains Mono',monospace",
-  sans: "'Plus Jakarta Sans',sans-serif",
-  display: "'Bricolage Grotesque',sans-serif",
-};
+/* ─── DESIGN TOKENS ─────────────────────────────────────────────────────── */
+const A = "#f97316";
+const BLUE = "#2563eb";
+const GREEN = "#059669";
+const VIOLET = "#7c3aed";
+const ROSE = "#e11d48";
+const AMBER = "#d97706";
+const MUTED = "#607080";
+const TEXT = "#0c1829";
+const BORDER = "#e8eef6";
+const BORDER2 = "#d2dcea";
+const SANS = "'Plus Jakarta Sans',sans-serif";
+const MONO = "'JetBrains Mono',monospace";
+const DISPLAY = "'Bricolage Grotesque',sans-serif";
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800;12..96,900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800;12..96,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f2f5fb;font-family:'Plus Jakarta Sans',sans-serif;color:#0c1829;-webkit-font-smoothing:antialiased}
+html,body,#root{height:100%}
+body{background:#f1f4fb;font-family:${SANS};color:${TEXT};-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#d5def0;border-radius:8px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+::-webkit-scrollbar-thumb{background:${BORDER2};border-radius:8px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-.au{animation:fadeUp .35s cubic-bezier(.22,1,.36,1) both}
-.au2{animation:fadeUp .35s .07s cubic-bezier(.22,1,.36,1) both}
-.au3{animation:fadeUp .35s .14s cubic-bezier(.22,1,.36,1) both}
-.ai{animation:fadeIn .25s ease both}
-.si{animation:slideIn .25s ease both}
+.au{animation:fadeUp .32s cubic-bezier(.22,1,.36,1) both}
+.au2{animation:fadeUp .32s .07s cubic-bezier(.22,1,.36,1) both}
+.au3{animation:fadeUp .32s .14s cubic-bezier(.22,1,.36,1) both}
 .pi{animation:popIn .2s cubic-bezier(.34,1.56,.64,1) both}
 .spin{animation:spin 1s linear infinite}
-.btn{transition:all .13s ease;cursor:pointer}
-.btn:hover{filter:brightness(1.05);transform:translateY(-1px)}
-.btn:active{transform:translateY(0);filter:brightness(.97)}
-.card-h{transition:box-shadow .18s,transform .18s}
-.card-h:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(12,24,41,.09)!important}
-.fade-row{transition:background .1s}
-.fade-row:hover{background:#f8faff!important}
-input,textarea,select{font-family:'Plus Jakarta Sans',sans-serif;color:#0c1829}
-input:focus,textarea:focus,select:focus{outline:2px solid #f97316;outline-offset:-1px;border-color:#f97316!important}
-@media print{.no-print{display:none!important}body{background:white}}
+.btn{transition:all .12s;cursor:pointer;border:none;background:transparent;padding:0}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.ch{transition:box-shadow .18s,transform .18s}
+.ch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(12,24,41,.1)!important}
+.fr{transition:background .1s}
+.fr:hover{background:#f6f9ff!important}
+input,select,textarea{font-family:${SANS};color:${TEXT};outline:none}
+input:focus,select:focus,textarea:focus{border-color:${A}!important;box-shadow:0 0 0 3px ${A}18!important}
+@media print{.noprint{display:none!important}body{background:#fff}}
 `;
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   TARIFARIO 2026 OFICIAL
-═══════════════════════════════════════════════════════════════════════════ */
-const TARIFA = [
+/* ─── TARIFARIO LOCAL OFICIAL 2026 (verificado del Excel) ───────────────── */
+const LOC = {
+  eur:{ normal:2500, ayudante:3000, urgente:2500, urgente_ay:3000, resguardo:1800, renta_dia:1600, renta_chofer:3500, renta_mes:36000 },
+  cam:{ normal:3200, ayudante:4300, urgente:3200, urgente_ay:4300, resguardo:3200, renta_dia:2800, renta_chofer:5800, renta_mes:63000 },
+  kra:{ normal:3600, ayudante:5000, urgente:3600, urgente_ay:5000, resguardo:3600 },
+  rab:{ normal:6000, ayudante:8000, urgente:6000, urgente_ay:8000, resguardo:6000 },
+  mud:{ normal:8000, ayudante:10000,urgente:8000, urgente_ay:10000,resguardo:8000 },
+};
+
+/* ─── TARIFARIO FORÁNEO 2026 (del Excel, valores exactos) ───────────────── */
+const TAR = [
   {c:"Acapulco",km:395,eur:13310,cam:20086,kra:22082,rab:26741,mud:32561},
   {c:"Aguascalientes",km:513,eur:15178,cam:22215,kra:24437,rab:30356,mud:36566},
   {c:"Apizaco",km:145,eur:6899,cam:11540,kra:12858,rab:17399,mud:22103},
@@ -154,348 +147,224 @@ const TARIFA = [
   {c:"Zamora",km:430,eur:13108,cam:18628,kra:20491,rab:24561,mud:33116},
 ];
 
-// TARIFARIO LOCAL OFICIAL 2026 — verificado con captura de pantalla
-const LOCALES = {
-  eur:{normal:2500, ayudante:3000, urgente:2500, urgente_ay:3000, resguardo:1800, renta_dia:1600, renta_chofer:3500, renta_mes:36000},
-  cam:{normal:3200, ayudante:4300, urgente:3200, urgente_ay:4300, resguardo:3200, renta_dia:2800, renta_chofer:5800, renta_mes:63000},
-  kra:{normal:3600, ayudante:5000, urgente:3600, urgente_ay:5000, resguardo:3600},
-  rab:{normal:6000, ayudante:8000, urgente:6000, urgente_ay:8000, resguardo:6000},
-  mud:{normal:8000, ayudante:10000,urgente:8000, urgente_ay:10000,resguardo:8000},
-};
-
-const VEHICULOS = [
-  {k:"eur",label:"Eurovan 1T",     cap:"8 m³",  crew:1,icon:"🚐"},
-  {k:"cam",label:"Camioneta 3.5T", cap:"16 m³", crew:1,icon:"🚛"},
-  {k:"kra",label:"Krafter",        cap:"20 m³", crew:1,icon:"🚐"},
-  {k:"rab",label:"Rabón 40 m³",    cap:"40 m³", crew:2,icon:"🚚"},
-  {k:"mud",label:"Mudancero 70 m³",cap:"70 m³", crew:3,icon:"🏗️"},
+const VEHK = [
+  {k:"eur",label:"Eurovan 1T",cap:"8 m³",crew:1,icon:"🚐"},
+  {k:"cam",label:"Camioneta 3.5T",cap:"16 m³",crew:1,icon:"🚛"},
+  {k:"kra",label:"Krafter",cap:"20 m³",crew:1,icon:"🚐"},
+  {k:"rab",label:"Rabón 40 m³",cap:"40 m³",crew:2,icon:"🚚"},
+  {k:"mud",label:"Mudancero 70 m³",cap:"70 m³",crew:3,icon:"🏗️"},
 ];
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CONSTANTS & UTILS
-═══════════════════════════════════════════════════════════════════════════ */
-const KM_DIA = 550;
-const COMIDA_DEF = 350;
-const HOTEL_DEF = 900;
-const ENTREGA_ADIC = 1200;
-const AYUD_COSTO = 2800;
+/* ─── UTILS ─────────────────────────────────────────────────────────────── */
+const fmt = n => "$"+Math.round(n).toLocaleString("es-MX");
+const fmtK = n => n>=1e6?"$"+(n/1e6).toFixed(2)+"M":n>=1e3?"$"+(n/1e3).toFixed(1)+"k":"$"+Math.round(n);
+const uid = () => Math.random().toString(36).slice(2,8).toUpperCase();
+const KM_DIA=550, COMIDA=350, HOTEL=900, ADIC=1200, AYUD=2800;
 
-const fmt = n => `$${Math.round(n).toLocaleString("es-MX")}`;
-const fmtK = n => n>=1e6?`$${(n/1e6).toFixed(2)}M`:n>=1e3?`$${(n/1e3).toFixed(1)}k`:`$${Math.round(n)}`;
-const today = () => new Date().toLocaleDateString("es-MX",{year:"numeric",month:"long",day:"numeric"});
-const uid = () => Math.random().toString(36).slice(2,9);
-
-function calcDias(km){
-  if(!km||km===0) return {camino:0,noches:0,total:0};
-  const camino = Math.ceil(km/KM_DIA);
-  const noches = km>300?camino:0;
-  return {camino,noches,total:camino*2};
+function diasRuta(km){
+  if(!km) return {ida:0,noches:0,total:0};
+  const ida=Math.ceil(km/KM_DIA);
+  return {ida, noches:km>300?ida:0, total:ida*2};
 }
-
-function calcViaticos(km,crew,comida=COMIDA_DEF,hotel=HOTEL_DEF){
-  const {total,noches}=calcDias(km);
-  const xComida = total>0?comida*crew*total:0;
-  const xHotel  = noches>0?hotel*crew*noches:0;
-  return {xComida,xHotel,total:xComida+xHotel,dias:total,noches};
+function calcViaticos(km,crew,comida=COMIDA,hotel=HOTEL){
+  const {total,noches}=diasRuta(km);
+  const xC=comida*crew*total;
+  const xH=hotel*crew*noches;
+  return {xC,xH,total:xC+xH,dias:total,noches};
 }
-
-function calcFlota(totalPDV,maxDia,plazo){
-  const camionetas = Math.max(1,Math.ceil(totalPDV/(maxDia*plazo)));
-  const dias = Math.ceil(totalPDV/(maxDia*camionetas));
-  const capDia = maxDia*camionetas;
-  return {camionetas,dias,capDia};
+function calcFlota(pdv,maxDia,plazo){
+  const vans=Math.max(1,Math.ceil(pdv/(maxDia*plazo)));
+  const dias=Math.ceil(pdv/(maxDia*vans));
+  return {vans,dias,capDia:maxDia*vans};
 }
-
-function buildMapsURL(stops){
-  // stops = [{city:"Ciudad de México"}, {city:"Monterrey"}, ...]
+function mapsURL(stops){
   if(!stops||stops.length<2) return null;
-  const parts = stops.map(s=>encodeURIComponent(s+(", México")));
-  const origin = parts[0];
-  const dest = parts[parts.length-1];
-  const wps = parts.slice(1,-1);
-  let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}`;
-  if(wps.length>0) url += `&waypoints=${wps.join("|")}`;
-  url += "&travelmode=driving";
-  return url;
+  const enc=s=>encodeURIComponent(s+", México");
+  const o=enc(stops[0]),d=enc(stops[stops.length-1]);
+  const wp=stops.slice(1,-1).map(enc);
+  return "https://www.google.com/maps/dir/?api=1&origin="+o+"&destination="+d+(wp.length?"&waypoints="+wp.join("|"):"")+"&travelmode=driving";
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PDF GENERATOR
-═══════════════════════════════════════════════════════════════════════════ */
-function generateQuotePDF(q){
-  const lineHTML = (label,value,bold=false,color="#0d1b2e")=>`
-    <tr>
-      <td style="padding:9px 0;border-bottom:1px solid #eef2f8;font-size:13px;color:#5e7291;font-weight:${bold?"700":"400"}">${label}</td>
-      <td style="padding:9px 0;border-bottom:1px solid #eef2f8;text-align:right;font-size:${bold?"16":"13"}px;font-weight:700;color:${color};font-family:'JetBrains Mono',monospace">${value}</td>
-    </tr>`;
-
-  const html = `<!DOCTYPE html><html lang="es"><head>
-<meta charset="UTF-8"/>
-<title>Cotización DMvimiento - ${q.folio||"N/A"}</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#0d1b2e;padding:40px}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #f97316}
-  .logo{font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;color:#0d1b2e}
-  .logo span{color:#f97316}
-  .folio{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5e7291;background:#f0f3fa;padding:6px 14px;border-radius:20px;margin-top:8px}
-  .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:32px}
-  .meta-box label{font-size:10px;font-weight:700;color:#5e7291;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
-  .meta-box .val{font-size:15px;font-weight:700;color:#0d1b2e}
-  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5e7291;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f4}
-  table{width:100%;border-collapse:collapse;margin-bottom:28px}
-  .total-row{background:#fff4ec;padding:16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
-  .total-row .label{font-size:14px;font-weight:600;color:#5e7291}
-  .total-row .amount{font-size:28px;font-weight:800;color:#f97316;font-family:'JetBrains Mono',monospace}
-  .footer{margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f4;display:flex;justify-content:space-between;font-size:11px;color:#94a8bc}
-  .badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid currentColor}
-  .notes-box{background:#f8fafd;border:1px solid #e2e8f4;border-radius:10px;padding:14px;margin-bottom:28px;font-size:13px;color:#5e7291;line-height:1.6}
-  .route-stop{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px}
-  .stop-dot{width:8px;height:8px;border-radius:50%;background:#f97316;flex-shrink:0}
-  @media print{body{padding:20px}}
-</style>
-</head><body>
-<div class="header">
-  <div>
-    <div class="logo">DM<span>vimiento</span></div>
-    <div style="font-size:12px;color:#5e7291;margin-top:4px">Logística Especializada · México 2026</div>
-    <div class="folio" style="display:inline-block;margin-top:8px">FOLIO: ${q.folio||uid().toUpperCase()}</div>
-  </div>
-  <div style="text-align:right">
-    <div style="font-size:11px;color:#5e7291">Fecha de emisión</div>
-    <div style="font-size:14px;font-weight:700;margin-top:4px">${today()}</div>
-    <div style="margin-top:8px">
-      <span class="badge" style="color:${q.modo==="local"?T.green:q.modo==="ruta"?T.violet:T.accent}">
-        ${q.modo==="local"?"SERVICIO LOCAL":q.modo==="foraneo"?"FORÁNEO":q.modo==="masivo"?"DISTRIBUCIÓN MASIVA":"RUTA MULTI-DESTINO"}
-      </span>
-    </div>
-  </div>
+/* ─── PDF ───────────────────────────────────────────────────────────────── */
+function printPDF(q){
+  const row=(l,v,bold,color)=>`<tr><td style="padding:9px 0;border-bottom:1px solid #eef2f8;font-size:13px;color:#607080;font-weight:${bold?700:400}">${l}</td><td style="padding:9px 0;border-bottom:1px solid #eef2f8;text-align:right;font-size:${bold?16:13}px;font-weight:700;color:${color||"#0c1829"};font-family:'JetBrains Mono',monospace">${v}</td></tr>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Cotización ${q.folio}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"/>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Plus Jakarta Sans',sans-serif;background:#fff;color:#0c1829;padding:40px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:20px;border-bottom:3px solid #f97316}
+.logo{font-size:26px;font-weight:800}.logo span{color:#f97316}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
+.meta label{font-size:10px;font-weight:700;color:#607080;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px}
+.meta .v{font-size:15px;font-weight:700}
+.sec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#607080;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #eef2f8}
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.tot{background:#fff8f3;padding:16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.tot .lbl{font-size:13px;font-weight:600;color:#607080}.tot .amt{font-size:28px;font-weight:800;color:#f97316;font-family:'JetBrains Mono',monospace}
+.footer{margin-top:36px;padding-top:16px;border-top:1px solid #eef2f8;display:flex;justify-content:space-between;font-size:11px;color:#9db0c4}
+.note{background:#f8fafd;border:1px solid #eef2f8;border-radius:8px;padding:12px;font-size:12px;color:#607080;line-height:1.6;margin-bottom:20px}
+@media print{body{padding:20px}}</style></head><body>
+<div class="hdr"><div><div class="logo">DM<span>vimiento</span></div><div style="font-size:12px;color:#607080;margin-top:4px">Logística Especializada · México 2026</div>
+<div style="margin-top:8px;display:inline-block;background:#f1f4fb;padding:4px 12px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;color:#607080">FOLIO: ${q.folio}</div></div>
+<div style="text-align:right"><div style="font-size:11px;color:#607080">Fecha</div><div style="font-weight:700;margin-top:2px">${new Date().toLocaleDateString("es-MX",{year:"numeric",month:"long",day:"numeric"})}</div>
+<div style="margin-top:8px;display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4ec;color:#f97316">${q.modoLabel||q.modo}</div></div></div>
+<div class="meta">
+<div><label>Cliente</label><div class="v">${q.cliente||"—"}</div></div>
+<div><label>Contacto</label><div class="v">${q.contacto||"—"}</div></div>
+<div><label>Destino</label><div class="v">${q.destino||"—"}</div></div>
+<div><label>Vehículo</label><div class="v">${q.vehiculoLabel||"—"}</div></div>
 </div>
-
-<div class="meta-grid">
-  <div class="meta-box"><label>Cliente</label><div class="val">${q.cliente||"—"}</div></div>
-  <div class="meta-box"><label>Contacto</label><div class="val">${q.contacto||"—"}</div></div>
-  <div class="meta-box"><label>Destino principal</label><div class="val">${q.destino||"Ciudad de México"}</div></div>
-  <div class="meta-box"><label>Vehículo</label><div class="val">${q.vehiculoLabel||"—"}</div></div>
-</div>
-
-${q.stops&&q.stops.length>0?`
-<div class="section-title">Paradas de ruta</div>
-${q.stops.map((s,i)=>`<div class="route-stop"><div class="stop-dot"></div><div><strong>${s.city}</strong>${s.pdv?` — ${s.pdv} PDVs`:""}</div></div>`).join("")}
-<div style="margin-bottom:24px"></div>
-`:""}
-
-<div class="section-title">Desglose de costos</div>
-<table>
-<tbody>
-${q.lines?q.lines.map(l=>lineHTML(l.label,l.value,l.bold||false,l.color||"#0d1b2e")).join(""):""}
-</tbody>
-</table>
-
-<div class="total-row">
-  <div class="label">TOTAL CON IVA</div>
-  <div class="amount">${fmt(q.total||0)}</div>
-</div>
-
-${q.flota?`
-<div style="margin-top:28px">
-<div class="section-title">Plan de flota</div>
-<table><tbody>
-${lineHTML("Camionetas necesarias",q.flota.camionetas+" unidades")}
-${lineHTML("Días de operación",q.flota.dias+" días")}
-${lineHTML("Capacidad diaria",q.flota.capDia.toLocaleString()+" entregas/día")}
-${lineHTML("PDV totales",(q.totalPDV||0).toLocaleString())}
-${lineHTML("Plazo máximo",q.plazo+" días")}
-</tbody></table></div>`:""}
-
-${q.notas?`<div class="section-title">Notas y condiciones</div><div class="notes-box">${q.notas}</div>`:""}
-
-<div class="notes-box">
-<strong>Condiciones generales:</strong> Esta propuesta es válida por 15 días naturales. Los precios no incluyen IVA (16%) ya incluido en el total mostrado. El servicio incluye combustible, casetas y seguro básico de mercancía. Viáticos calculados sobre tarifas estándar ajustables. Sujeto a disponibilidad de unidades.
-</div>
-
-<div class="footer">
-  <div>DMvimiento Logística Especializada · logistics@dmvimiento.com · +52 (55) XXXX-XXXX</div>
-  <div>Generado el ${new Date().toLocaleString("es-MX")}</div>
-</div>
+${q.stops&&q.stops.length>1?`<div class="sec">Paradas de ruta</div>${q.stops.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px"><div style="width:20px;height:20px;border-radius:50%;background:#fff4ec;color:#f97316;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div><strong>${s.city||s}</strong>${s.pdv?" — "+s.pdv+" PDVs":""}</div>`).join("")}<div style="margin-bottom:20px"></div>`:""}
+<div class="sec">Desglose de costos</div>
+<table><tbody>${(q.lines||[]).map(l=>row(l.label,l.value,l.bold,l.color)).join("")}</tbody></table>
+<div class="tot"><div class="lbl">TOTAL CON IVA</div><div class="amt">${fmt(q.total||0)}</div></div>
+${q.flota?`<div style="margin-top:24px"><div class="sec">Plan de flota</div><table><tbody>${row("Camionetas",q.flota.vans+" unidades")}${row("Días de operación",q.flota.dias+" días")}${row("Capacidad diaria",q.flota.capDia.toLocaleString()+" entregas/día")}${row("PDV totales",(q.totalPDV||0).toLocaleString())}</tbody></table></div>`:""}
+<div class="note"><strong>Condiciones generales:</strong> Propuesta válida por 15 días. Precios sin IVA mostrados por separado. Servicio incluye combustible, casetas y seguro básico. Sujeto a disponibilidad de unidades.</div>
+${q.notas?`<div class="note">${q.notas}</div>`:""}
+<div class="footer"><div>DMvimiento Logística · México 2026</div><div>Generado ${new Date().toLocaleString("es-MX")}</div></div>
 </body></html>`;
-
-  const w = window.open("","_blank","width=900,height=700");
-  if(w){
-    w.document.write(html);
-    w.document.close();
-    setTimeout(()=>w.print(),600);
-  }
+  const w=window.open("","_blank","width=900,height=700");
+  if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),700);}
 }
 
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   UI ATOMS
-═══════════════════════════════════════════════════════════════════════════ */
-function Tag({color=T.accent,bg,children,sm}){
-  return <span style={{background:bg||`${color}18`,color,border:`1px solid ${color}28`,borderRadius:20,padding:sm?"2px 8px":"3px 12px",fontSize:sm?10:11,fontWeight:700,letterSpacing:"0.04em",whiteSpace:"nowrap",fontFamily:T.sans}}>{children}</span>;
+/* ─── ATOMS ─────────────────────────────────────────────────────────────── */
+function Tag({color=A,children,sm}){
+  return <span style={{background:color+"16",color,border:"1px solid "+color+"28",borderRadius:20,padding:sm?"2px 8px":"3px 12px",fontSize:sm?10:11,fontWeight:700,letterSpacing:"0.04em",whiteSpace:"nowrap",fontFamily:SANS}}>{children}</span>;
 }
 
-function Chip({color=T.accent,icon:Icon,children,onClick}){
+function KpiCard({icon:Icon,color,label,value,sub,onClick}){
   return(
-    <button onClick={onClick} className="btn" style={{display:"flex",alignItems:"center",gap:5,background:`${color}14`,color,border:`1px solid ${color}24`,borderRadius:8,padding:"5px 11px",fontSize:12,fontWeight:600,fontFamily:T.sans,cursor:onClick?"pointer":"default"}}>
-      {Icon&&<Icon size={11}/>}{children}
-    </button>
-  );
-}
-
-function KpiCard({icon:Icon,color,label,value,sub,trend,onClick}){
-  return(
-    <div onClick={onClick} className="card-h au" style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,padding:"22px 24px",cursor:onClick?"pointer":"default"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-        <div style={{width:40,height:40,borderRadius:12,background:`${color}14`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <Icon size={18} color={color}/>
-        </div>
-        {trend!=null&&<div style={{display:"flex",alignItems:"center",gap:4,fontSize:11,fontWeight:700,color:trend>=0?T.green:T.rose}}>
-          {trend>=0?<ChevronUp size={12}/>:<ChevronDown size={12}/>}{Math.abs(trend)}%
-        </div>}
+    <div onClick={onClick} className="ch au" style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:16,padding:"20px 22px",cursor:onClick?"pointer":"default",boxShadow:"0 1px 4px rgba(12,24,41,.05)"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+        <div style={{width:38,height:38,borderRadius:11,background:color+"14",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon size={17} color={color}/></div>
       </div>
-      <div style={{fontFamily:T.mono,fontSize:26,fontWeight:700,color:T.text,lineHeight:1,marginBottom:5}}>{value}</div>
-      <div style={{fontSize:12,fontWeight:600,color:T.muted,letterSpacing:"0.04em"}}>{label}</div>
-      {sub&&<div style={{fontSize:11,color:T.mutedLight,marginTop:3}}>{sub}</div>}
+      <div style={{fontFamily:MONO,fontSize:26,fontWeight:700,color:TEXT,lineHeight:1,marginBottom:4}}>{value}</div>
+      <div style={{fontSize:12,fontWeight:600,color:MUTED,letterSpacing:"0.03em"}}>{label}</div>
+      {sub&&<div style={{fontSize:11,color:MUTED+"90",marginTop:2}}>{sub}</div>}
     </div>
   );
 }
 
-function Loader({text="Cargando..."}){
-  return(
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:14,height:200}}>
-      <div style={{width:32,height:32,border:`3px solid ${T.border2}`,borderTop:`3px solid ${T.accent}`,borderRadius:"50%"}} className="spin"/>
-      <span style={{fontFamily:T.sans,fontSize:13,color:T.muted}}>{text}</span>
-    </div>
-  );
-}
-
-function Toast({msg,type="ok",onClose}){
+function Toast({msg,type,onClose}){
   useEffect(()=>{const t=setTimeout(()=>onClose&&onClose(),3500);return()=>clearTimeout(t);},[]);
-  const c=type==="err"?T.rose:T.green;
+  const c=type==="err"?ROSE:GREEN;
   return(
-    <div className="pi" style={{position:"fixed",top:20,right:24,zIndex:9999,background:"#ffffff",border:`1px solid ${c}40`,borderRadius:14,padding:"12px 20px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 40px rgba(0,0,0,.14)",fontFamily:T.sans,fontSize:13,color:T.text,minWidth:280,maxWidth:400}}>
-      <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0,boxShadow:`0 0 8px ${c}`}}/>
+    <div className="pi" style={{position:"fixed",top:20,right:24,zIndex:9999,background:"#fff",border:"1px solid "+c+"38",borderRadius:14,padding:"12px 18px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 8px 40px rgba(0,0,0,.14)",fontSize:13,minWidth:260,maxWidth:400}}>
+      <div style={{width:8,height:8,borderRadius:"50%",background:c,flexShrink:0,boxShadow:"0 0 8px "+c}}/>
       <span style={{flex:1}}>{msg}</span>
-      <button onClick={onClose} style={{border:"none",background:"transparent",color:T.muted,cursor:"pointer",padding:0}}><X size={14}/></button>
+      <button onClick={onClose} className="btn" style={{color:MUTED,padding:2}}><X size={13}/></button>
     </div>
   );
 }
 
-function Modal({title,onClose,children,wide,icon:Icon,iconColor=T.accent}){
+function Modal({title,onClose,children,wide,icon:Icon,iconColor=A}){
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(13,27,46,.45)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(6px)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="pi" style={{background:T.card,borderRadius:22,width:"100%",maxWidth:wide?740:480,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 32px 100px rgba(0,0,0,.22)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:12,padding:"22px 26px",borderBottom:`1px solid ${T.border}`,position:"sticky",top:0,background:T.card,zIndex:10,borderRadius:"22px 22px 0 0"}}>
-          {Icon&&<div style={{width:34,height:34,borderRadius:10,background:`${iconColor}14`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={16} color={iconColor}/></div>}
-          <span style={{fontFamily:T.display,fontWeight:700,fontSize:17,color:T.text,flex:1}}>{title}</span>
-          <button onClick={onClose} style={{width:30,height:30,borderRadius:"50%",border:`1px solid ${T.border2}`,background:"transparent",cursor:"pointer",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><X size={14}/></button>
+    <div onClick={e=>e.target===e.currentTarget&&onClose()} style={{position:"fixed",inset:0,background:"rgba(12,24,41,.4)",zIndex:500,display:"flex",alignItems:"center",justifyContent:"center",padding:16,backdropFilter:"blur(4px)"}}>
+      <div className="pi" style={{background:"#fff",borderRadius:20,width:"100%",maxWidth:wide?740:480,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 32px 80px rgba(0,0,0,.2)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:11,padding:"20px 24px",borderBottom:"1px solid "+BORDER,position:"sticky",top:0,background:"#fff",zIndex:10,borderRadius:"20px 20px 0 0"}}>
+          {Icon&&<div style={{width:32,height:32,borderRadius:9,background:iconColor+"14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={15} color={iconColor}/></div>}
+          <span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:16,flex:1}}>{title}</span>
+          <button onClick={onClose} className="btn" style={{width:28,height:28,borderRadius:"50%",border:"1px solid "+BORDER2,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED}}><X size={13}/></button>
         </div>
-        <div style={{padding:"24px 26px"}}>{children}</div>
+        <div style={{padding:"22px 24px"}}>{children}</div>
       </div>
     </div>
   );
 }
 
-function Input({label,hint,...props}){
-  const [focused,setFocused]=useState(false);
+function Inp({label,...p}){
+  const [f,setF]=useState(false);
   return(
     <div>
-      {label&&<label style={{display:"block",fontSize:10,fontWeight:700,color:T.muted,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</label>}
-      <input {...props}
-        onFocus={e=>{setFocused(true);props.onFocus&&props.onFocus(e);}}
-        onBlur={e=>{setFocused(false);props.onBlur&&props.onBlur(e);}}
-        style={{width:"100%",background:"#ffffff",border:`1.5px solid ${focused?T.accent:T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",transition:"border-color .15s",boxShadow:focused?`0 0 0 3px ${T.accent}14`:"none",...props.style}}/>
-      {hint&&<div style={{fontSize:11,color:T.mutedLight,marginTop:4}}>{hint}</div>}
+      {label&&<div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</div>}
+      <input {...p} onFocus={e=>{setF(true);p.onFocus&&p.onFocus(e);}} onBlur={e=>{setF(false);p.onBlur&&p.onBlur(e);}}
+        style={{width:"100%",background:"#fff",border:"1.5px solid "+(f?A:BORDER2),borderRadius:10,padding:"10px 13px",fontSize:14,transition:"all .13s",boxShadow:f?"0 0 0 3px "+A+"14":"none",...p.style}}/>
     </div>
   );
 }
 
-function Textarea({label,...props}){
+function Sel({label,options,value,onChange}){
   return(
     <div>
-      {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</label>}
-      <textarea {...props} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",resize:"vertical",minHeight:80,...props.style}}/>
-    </div>
-  );
-}
-
-function Select({label,options,value,onChange,style}){
-  return(
-    <div style={style}>
-      {label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</label>}
-      <select value={value} onChange={onChange} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,padding:"10px 14px",color:T.text,fontFamily:T.sans,fontSize:14,outline:"none",cursor:"pointer"}}>
-        {options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}
+      {label&&<div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</div>}
+      <select value={value} onChange={onChange} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:10,padding:"10px 13px",fontSize:14,cursor:"pointer"}}>
+        {options.map(o=><option key={o.v||o} value={o.v||o}>{o.l||o}</option>)}
       </select>
     </div>
   );
 }
 
-function Stepper({label,value,onChange,min=0,max=9999,step=1}){
+function Txt({label,...p}){
   return(
     <div>
-      {label&&<div style={{fontSize:11,fontWeight:700,color:T.muted,marginBottom:6,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</div>}
+      {label&&<div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</div>}
+      <textarea {...p} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:10,padding:"10px 13px",fontSize:14,resize:"vertical",minHeight:75,...p.style}}/>
+    </div>
+  );
+}
+
+function Spin({label,value,onChange,min=0,max=9999,step=1}){
+  return(
+    <div>
+      {label&&<div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,letterSpacing:"0.07em",textTransform:"uppercase"}}>{label}</div>}
       <div style={{display:"flex",alignItems:"center",gap:6}}>
-        <button onClick={()=>onChange(Math.max(min,value-step))} className="btn" style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><Minus size={13}/></button>
+        <button onClick={()=>onChange(Math.max(min,value-step))} className="btn" style={{width:30,height:30,borderRadius:8,border:"1.5px solid "+BORDER2,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED}}><Minus size={12}/></button>
         <input type="number" value={value} onChange={e=>onChange(Math.min(max,Math.max(min,Number(e.target.value)||min)))}
-          style={{width:72,textAlign:"center",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"6px 4px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
-        <button onClick={()=>onChange(Math.min(max,value+step))} className="btn" style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><Plus size={13}/></button>
+          style={{width:68,textAlign:"center",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:8,padding:"5px 0",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
+        <button onClick={()=>onChange(Math.min(max,value+step))} className="btn" style={{width:30,height:30,borderRadius:8,border:"1.5px solid "+BORDER2,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED}}><Plus size={12}/></button>
       </div>
     </div>
   );
 }
 
-function Toggle({checked,onChange,label,sub,accent=T.accent}){
+function Tog({checked,onChange,label,sub,color=A}){
   return(
-    <button onClick={()=>onChange(!checked)} className="btn" style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,border:`1.5px solid ${checked?accent:T.border2}`,background:checked?`${accent}08`:"#ffffff",cursor:"pointer",width:"100%",textAlign:"left",transition:"all .15s",boxShadow:checked?`0 0 0 3px ${accent}12`:"none"}}>
-      <div style={{width:20,height:20,borderRadius:"50%",flexShrink:0,border:`2px solid ${checked?accent:T.border2}`,background:checked?accent:"#fff",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .15s",boxShadow:checked?`0 2px 8px ${accent}40`:"none"}}>
-        {checked&&<Check size={11} color="#fff"/>}
+    <button onClick={()=>onChange(!checked)} className="btn" style={{display:"flex",alignItems:"center",gap:11,padding:"10px 13px",borderRadius:11,border:"1.5px solid "+(checked?color:BORDER2),background:checked?color+"08":"#fff",cursor:"pointer",width:"100%",textAlign:"left",transition:"all .13s",boxShadow:checked?"0 0 0 3px "+color+"12":"none"}}>
+      <div style={{width:19,height:19,borderRadius:"50%",border:"2px solid "+(checked?color:BORDER2),background:checked?color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .13s"}}>
+        {checked&&<Check size={10} color="#fff"/>}
       </div>
       <div style={{flex:1}}>
-        <div style={{fontFamily:T.sans,fontSize:13,fontWeight:600,color:T.text}}>{label}</div>
-        {sub&&<div style={{fontFamily:T.sans,fontSize:11,color:T.muted,marginTop:1}}>{sub}</div>}
+        <div style={{fontSize:13,fontWeight:600,color:TEXT}}>{label}</div>
+        {sub&&<div style={{fontSize:11,color:MUTED,marginTop:1}}>{sub}</div>}
       </div>
     </button>
   );
 }
 
-function InfoBox({icon:Icon,color,title,value,sub,xs}){
+function InfoBox({icon:Icon,color,title,value,sub}){
   return(
-    <div style={{background:`${color}0c`,border:`1px solid ${color}22`,borderRadius:12,padding:xs?"10px 12px":"14px 16px",display:"flex",alignItems:"center",gap:10}}>
-      <div style={{width:xs?30:36,height:xs?30:36,borderRadius:xs?8:10,background:`${color}18`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={xs?13:16} color={color}/></div>
+    <div style={{background:color+"0a",border:"1px solid "+color+"20",borderRadius:11,padding:"10px 13px",display:"flex",alignItems:"center",gap:9}}>
+      <div style={{width:32,height:32,borderRadius:9,background:color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={14} color={color}/></div>
       <div>
-        <div style={{fontFamily:T.sans,fontSize:10,color:T.muted,fontWeight:600,letterSpacing:"0.04em"}}>{title}</div>
-        <div style={{fontFamily:T.mono,fontWeight:700,fontSize:xs?14:17,color,lineHeight:1.1}}>{value}</div>
-        {sub&&<div style={{fontFamily:T.sans,fontSize:10,color:T.muted,marginTop:2}}>{sub}</div>}
+        <div style={{fontSize:10,color:MUTED,fontWeight:600,letterSpacing:"0.03em"}}>{title}</div>
+        <div style={{fontFamily:MONO,fontWeight:700,fontSize:16,color,lineHeight:1.1}}>{value}</div>
+        {sub&&<div style={{fontSize:10,color:MUTED,marginTop:2}}>{sub}</div>}
       </div>
     </div>
   );
 }
 
-function CitySearch({placeholder,value,onChange,onSelect,vehiculo,exclude=[]}){
+function CitySearch({value,onChange,onSelect,veh,exclude=[]}){
   const [open,setOpen]=useState(false);
-  const filt=TARIFA.filter(t=>t.c.toLowerCase().includes(value.toLowerCase())&&!exclude.includes(t.c));
+  const filt=TAR.filter(t=>t.c.toLowerCase().includes(value.toLowerCase())&&!exclude.includes(t.c));
   return(
     <div style={{position:"relative"}}>
       <div style={{position:"relative"}}>
-        <Search size={13} color={T.muted} style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}/>
+        <Search size={13} color={MUTED} style={{position:"absolute",left:11,top:"50%",transform:"translateY(-50%)",pointerEvents:"none"}}/>
         <input value={value} onChange={e=>{onChange(e.target.value);setOpen(true);}} onFocus={()=>setOpen(true)}
-          placeholder={placeholder||"Buscar ciudad..."}
-          style={{width:"100%",paddingLeft:34,paddingRight:14,paddingTop:10,paddingBottom:10,background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:10,color:T.text,fontFamily:T.sans,fontSize:14,outline:"none"}}/>
+          placeholder={"Busca entre "+TAR.length+" destinos…"}
+          style={{width:"100%",paddingLeft:32,paddingRight:12,paddingTop:10,paddingBottom:10,background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:10,fontSize:14}}/>
       </div>
       {open&&value&&filt.length>0&&(
-        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,right:0,background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:14,zIndex:200,maxHeight:260,overflowY:"auto",boxShadow:"0 16px 60px rgba(0,0,0,.15)"}}>
-          {filt.slice(0,12).map(t=>(
-            <button key={t.c} onClick={()=>{onSelect(t);setOpen(false);onChange("");}}
-              className="btn fade-row" style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"10px 16px",border:"none",borderBottom:`1px solid ${T.border}`,background:"transparent",cursor:"pointer"}}>
-              <MapPin size={12} color={T.accent}/>
+        <div style={{position:"absolute",top:"calc(100% + 5px)",left:0,right:0,background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:13,zIndex:200,maxHeight:240,overflowY:"auto",boxShadow:"0 16px 50px rgba(0,0,0,.13)"}}>
+          {filt.slice(0,10).map(t=>(
+            <button key={t.c} onClick={()=>{onSelect(t);setOpen(false);onChange("");}} className="btn fr"
+              style={{width:"100%",display:"flex",alignItems:"center",gap:11,padding:"9px 14px",borderBottom:"1px solid "+BORDER,background:"transparent",cursor:"pointer"}}>
+              <MapPin size={11} color={A}/>
               <div style={{flex:1,textAlign:"left"}}>
-                <div style={{fontFamily:T.sans,fontWeight:600,fontSize:13,color:T.text}}>{t.c}</div>
-                <div style={{fontFamily:T.mono,fontSize:10,color:T.muted}}>{t.km.toLocaleString()} km de CDMX · {Math.ceil(t.km/KM_DIA)} día{Math.ceil(t.km/KM_DIA)>1?"s":""}</div>
+                <div style={{fontWeight:600,fontSize:13}}>{t.c}</div>
+                <div style={{fontFamily:MONO,fontSize:10,color:MUTED}}>{t.km.toLocaleString()} km · {Math.ceil(t.km/KM_DIA)} día(s)</div>
               </div>
-              {vehiculo&&<span style={{fontFamily:T.mono,fontSize:12,color:T.accent,fontWeight:700}}>{fmt(t[vehiculo])}</span>}
+              {veh&&<span style={{fontFamily:MONO,fontSize:12,color:A,fontWeight:700}}>{fmt(t[veh])}</span>}
             </button>
           ))}
         </div>
@@ -504,165 +373,146 @@ function CitySearch({placeholder,value,onChange,onSelect,vehiculo,exclude=[]}){
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── SIDEBAR ───────────────────────────────────────────────────────────── */
 const NAV=[
   {id:"dashboard",label:"Dashboard",icon:LayoutDashboard},
   {id:"cotizador",label:"Cotizador Pro",icon:DollarSign,badge:"★"},
   {id:"rutas",label:"Planificador Rutas",icon:Route,badge:"NEW"},
   {id:"facturas",label:"Facturación",icon:FileText},
-  {id:"cuentas",label:"Clientes",icon:Building2},
+  {id:"clientes",label:"Clientes",icon:Building2},
   {id:"entregas",label:"Entregas",icon:Package},
 ];
 
 function Sidebar({view,setView,stats}){
   return(
-    <aside className="no-print" style={{width:220,background:T.sidebar,display:"flex",flexDirection:"column",height:"100vh",position:"sticky",top:0,flexShrink:0}}>
-      <div style={{padding:"22px 18px",borderBottom:`1px solid ${T.sidebarBorder}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:38,height:38,background:`linear-gradient(135deg,${T.accent},#fb923c)`,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 20px ${T.accent}50`,flexShrink:0}}>
-            <Truck size={18} color="#fff"/>
+    <aside className="noprint" style={{width:214,background:"#0a1628",display:"flex",flexDirection:"column",height:"100vh",position:"sticky",top:0,flexShrink:0}}>
+      <div style={{padding:"20px 16px",borderBottom:"1px solid #16253d"}}>
+        <div style={{display:"flex",alignItems:"center",gap:9}}>
+          <div style={{width:36,height:36,background:"linear-gradient(135deg,"+A+",#fb923c)",borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 16px "+A+"50",flexShrink:0}}>
+            <Truck size={17} color="#fff"/>
           </div>
           <div>
-            <div style={{fontFamily:T.display,fontWeight:800,fontSize:17,color:"#fff",letterSpacing:"-0.02em"}}>DMvimiento</div>
-            <div style={{fontFamily:T.sans,fontSize:10,color:"#4d6280",letterSpacing:"0.07em",textTransform:"uppercase"}}>Logistics OS</div>
+            <div style={{fontFamily:DISPLAY,fontWeight:800,fontSize:16,color:"#fff",letterSpacing:"-0.02em"}}>DMvimiento</div>
+            <div style={{fontSize:9,color:"#3d5a7a",letterSpacing:"0.07em",textTransform:"uppercase",marginTop:1}}>Logistics OS</div>
           </div>
         </div>
       </div>
-      <nav style={{flex:1,padding:"10px 8px",overflowY:"auto"}}>
+      <nav style={{flex:1,padding:"8px 8px",overflowY:"auto"}}>
         {NAV.map(({id,label,icon:Icon,badge})=>{
           const a=view===id;
           return(
-            <button key={id} onClick={()=>setView(id)} className="btn" style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,marginBottom:2,cursor:"pointer",border:"none",transition:"all .15s",background:a?`${T.accent}22`:"transparent"}}>
-              <Icon size={15} color={a?T.accent:"#4d6280"}/>
-              <span style={{fontFamily:T.sans,fontSize:13,fontWeight:a?700:500,color:a?"#fff":"#4d6280",flex:1,textAlign:"left"}}>{label}</span>
-              {badge&&<span style={{fontSize:9,fontWeight:800,background:badge==="NEW"?T.blue:`${T.accent}30`,color:badge==="NEW"?"#fff":T.accent,borderRadius:6,padding:"2px 6px",letterSpacing:"0.04em"}}>{badge}</span>}
+            <button key={id} onClick={()=>setView(id)} className="btn" style={{width:"100%",display:"flex",alignItems:"center",gap:9,padding:"8px 11px",borderRadius:9,marginBottom:1,cursor:"pointer",transition:"all .13s",background:a?"#f97316"+"22":"transparent"}}>
+              <Icon size={14} color={a?A:"#3d5a7a"}/>
+              <span style={{fontFamily:SANS,fontSize:13,fontWeight:a?700:500,color:a?"#fff":"#3d5a7a",flex:1,textAlign:"left"}}>{label}</span>
+              {badge&&<span style={{fontSize:9,fontWeight:800,background:badge==="NEW"?BLUE:A+"30",color:badge==="NEW"?"#fff":A,borderRadius:5,padding:"2px 5px"}}>{badge}</span>}
             </button>
           );
         })}
       </nav>
-      <div style={{padding:"14px 16px",borderTop:`1px solid ${T.sidebarBorder}`}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-          <div style={{width:6,height:6,borderRadius:"50%",background:T.green,boxShadow:`0 0 8px ${T.green}`}}/>
-          <span style={{fontFamily:T.mono,fontSize:9,color:"#4d6280",letterSpacing:"0.06em",textTransform:"uppercase"}}>Firebase · En vivo</span>
+      <div style={{padding:"12px 14px",borderTop:"1px solid #16253d"}}>
+        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
+          <div style={{width:5,height:5,borderRadius:"50%",background:GREEN,boxShadow:"0 0 6px "+GREEN}}/>
+          <span style={{fontFamily:MONO,fontSize:9,color:"#3d5a7a",letterSpacing:"0.06em",textTransform:"uppercase"}}>Firebase · En vivo</span>
         </div>
-        <div style={{fontFamily:T.mono,fontSize:10,color:"#4d6280",lineHeight:1.7}}>
-          {stats.cotizaciones} cotizaciones<br/>
-          {stats.facturas} facturas · {stats.rutas} rutas
+        <div style={{fontFamily:MONO,fontSize:9,color:"#3d5a7a",lineHeight:1.8}}>
+          {stats.cot} cotizaciones<br/>
+          {stats.fac} facturas · {stats.rut} rutas
         </div>
       </div>
     </aside>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   DASHBOARD
-═══════════════════════════════════════════════════════════════════════════ */
-function Dashboard({setView,cotizaciones,facturas,rutas,entregas}){
-  const totalFacturado=facturas.reduce((a,f)=>a+(f.total||0),0);
-  const pendiente=facturas.filter(f=>f.status==="Pendiente").reduce((a,f)=>a+(f.total||0),0);
-  const cobrado=facturas.filter(f=>f.status==="Pagada").reduce((a,f)=>a+(f.total||0),0);
-
+/* ─── DASHBOARD ─────────────────────────────────────────────────────────── */
+function Dashboard({setView,cots,facts,rutas,entregas}){
+  const totalFac=facts.reduce((a,f)=>a+(f.total||0),0);
+  const pendiente=facts.filter(f=>f.status==="Pendiente").reduce((a,f)=>a+(f.total||0),0);
   const meses=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
   const chartData=meses.slice(0,new Date().getMonth()+1).map((m,i)=>({
     mes:m,
-    facturado:facturas.filter(f=>{const d=f.createdAt?.seconds;return d&&new Date(d*1000).getMonth()===i;}).reduce((a,f)=>a+(f.total||0),0),
-    cotizaciones:cotizaciones.filter(c=>{const d=c.createdAt?.seconds;return d&&new Date(d*1000).getMonth()===i;}).length*8000,
+    fac:facts.filter(f=>{const d=f.createdAt?.seconds;return d&&new Date(d*1000).getMonth()===i;}).reduce((a,f)=>a+(f.total||0),0),
   }));
-
-  const recent=[...cotizaciones].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,6);
-  const modeColor={local:T.green,foraneo:T.accent,masivo:T.blue,ruta:T.violet};
-  const modeLabel={local:"Local",foraneo:"Foráneo",masivo:"Masivo",ruta:"Ruta"};
-
+  const recent=[...cots].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,6);
+  const mC={local:GREEN,foraneo:A,masivo:BLUE,ruta:VIOLET};
+  const mL={local:"Local",foraneo:"Foráneo",masivo:"Masivo",ruta:"Ruta"};
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"32px 36px"}}>
-      <div className="au" style={{marginBottom:28,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+    <div style={{flex:1,overflowY:"auto",padding:"30px 34px",background:"#f1f4fb"}}>
+      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:26}}>
         <div>
-          <h1 style={{fontFamily:T.display,fontWeight:800,fontSize:32,color:T.text,letterSpacing:"-0.03em"}}>Operations Center</h1>
-          <p style={{color:T.muted,fontSize:13,marginTop:5}}>{new Date().toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>
+          <h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:30,color:TEXT,letterSpacing:"-0.03em"}}>Operations Center</h1>
+          <p style={{color:MUTED,fontSize:13,marginTop:4}}>{new Date().toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>
         </div>
-        <button onClick={()=>setView("cotizador")} className="btn" style={{display:"flex",alignItems:"center",gap:9,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:14,padding:"12px 22px",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 6px 24px ${T.accent}40`}}>
-          <DollarSign size={16}/>Nueva Cotización
+        <button onClick={()=>setView("cotizador")} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:13,padding:"11px 20px",fontFamily:SANS,fontWeight:700,fontSize:14,boxShadow:"0 6px 20px "+A+"40"}}>
+          <DollarSign size={15}/>Nueva Cotización
         </button>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:24}}>
-        <KpiCard icon={DollarSign} color={T.accent} label="Cotizaciones" value={cotizaciones.length} sub="en sistema" onClick={()=>setView("cotizador")}/>
-        <KpiCard icon={TrendingUp} color={T.green} label="Facturado" value={fmtK(totalFacturado)} sub="total emitido" onClick={()=>setView("facturas")}/>
-        <KpiCard icon={Clock} color={T.amber} label="Por cobrar" value={fmtK(pendiente)} sub="pendiente" onClick={()=>setView("facturas")}/>
-        <KpiCard icon={Route} color={T.violet} label="Rutas activas" value={rutas.filter(r=>r.status==="En curso").length} sub={`${rutas.length} totales`} onClick={()=>setView("rutas")}/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:13,marginBottom:22}}>
+        <KpiCard icon={DollarSign} color={A} label="Cotizaciones" value={cots.length} onClick={()=>setView("cotizador")}/>
+        <KpiCard icon={TrendingUp} color={GREEN} label="Facturado" value={fmtK(totalFac)} onClick={()=>setView("facturas")}/>
+        <KpiCard icon={Clock} color={AMBER} label="Por cobrar" value={fmtK(pendiente)} onClick={()=>setView("facturas")}/>
+        <KpiCard icon={Route} color={VIOLET} label="Rutas activas" value={rutas.filter(r=>r.status==="En curso").length} sub={rutas.length+" totales"} onClick={()=>setView("rutas")}/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:16,marginBottom:16}}>
-        <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
-          <div style={{padding:"18px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Facturación {new Date().getFullYear()}</span>
-            <Tag color={T.green}>{fmtK(cobrado)} cobrado</Tag>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 320px",gap:14,marginBottom:14}}>
+        <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(12,24,41,.05)"}}>
+          <div style={{padding:"16px 22px",borderBottom:"1px solid "+BORDER,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:14}}>Facturación {new Date().getFullYear()}</span>
+            <Tag color={GREEN}>{fmtK(facts.filter(f=>f.status==="Pagada").reduce((a,f)=>a+(f.total||0),0))} cobrado</Tag>
           </div>
-          <div style={{padding:"16px 8px 8px"}}>
-            {chartData.length>0?(
-              <ResponsiveContainer width="100%" height={160}>
-                <AreaChart data={chartData} margin={{top:4,right:16,left:0,bottom:0}}>
-                  <defs>
-                    <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={T.accent} stopOpacity={0.25}/>
-                      <stop offset="95%" stopColor={T.accent} stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={T.blue} stopOpacity={0.18}/>
-                      <stop offset="95%" stopColor={T.blue} stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="mes" tick={{fontSize:11,fontFamily:T.sans,fill:T.muted}} axisLine={false} tickLine={false}/>
+          <div style={{padding:"14px 8px 6px"}}>
+            {chartData.length>0
+              ?<ResponsiveContainer width="100%" height={150}>
+                <AreaChart data={chartData}>
+                  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={A} stopOpacity={.22}/><stop offset="95%" stopColor={A} stopOpacity={0}/></linearGradient></defs>
+                  <XAxis dataKey="mes" tick={{fontSize:11,fontFamily:SANS,fill:MUTED}} axisLine={false} tickLine={false}/>
                   <YAxis hide/>
-                  <Tooltip formatter={(v,n)=>[fmtK(v),n==="facturado"?"Facturado":"Cotizaciones"]} contentStyle={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:10,fontFamily:T.sans,fontSize:12}}/>
-                  <Area type="monotone" dataKey="facturado" stroke={T.accent} strokeWidth={2} fill="url(#gA)"/>
-                  <Area type="monotone" dataKey="cotizaciones" stroke={T.blue} strokeWidth={2} fill="url(#gB)"/>
+                  <Tooltip formatter={v=>[fmtK(v),"Facturado"]} contentStyle={{background:"#fff",border:"1px solid "+BORDER,borderRadius:9,fontFamily:SANS,fontSize:12}}/>
+                  <Area type="monotone" dataKey="fac" stroke={A} strokeWidth={2} fill="url(#g)"/>
                 </AreaChart>
               </ResponsiveContainer>
-            ):<div style={{height:160,display:"flex",alignItems:"center",justifyContent:"center",color:T.muted,fontSize:13}}>Sin datos aún</div>}
+              :<div style={{height:150,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED,fontSize:13}}>Sin datos aún</div>
+            }
           </div>
         </div>
 
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
           {[
-            {label:"Cotizador Pro",sub:"Local · Foráneo · Masivo · Rutas",icon:DollarSign,color:T.accent,v:"cotizador"},
-            {label:"Planificador Rutas",sub:"Multi-parada + Google Maps",icon:Route,color:T.violet,v:"rutas"},
-            {label:"Facturación",sub:"PDFs · Mensual · Clientes",icon:FileText,color:T.blue,v:"facturas"},
-            {label:"Tracking Entregas",sub:"Seguimiento en tiempo real",icon:Package,color:T.green,v:"entregas"},
+            {label:"Cotizador Pro",sub:"Local · Foráneo · Masivo",icon:DollarSign,color:A,v:"cotizador"},
+            {label:"Planificador Rutas",sub:"Multi-parada + Google Maps",icon:Route,color:VIOLET,v:"rutas"},
+            {label:"Facturación",sub:"PDFs · Mensual · Clientes",icon:FileText,color:BLUE,v:"facturas"},
+            {label:"Tracking",sub:"Entregas en tiempo real",icon:Package,color:GREEN,v:"entregas"},
           ].map(({label,sub,icon:Icon,color,v})=>(
-            <button key={v} onClick={()=>setView(v)} className="btn card-h" style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:13,border:`1px solid ${T.border}`,background:T.card,cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
-              <div style={{width:36,height:36,borderRadius:10,background:`${color}14`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={15} color={color}/></div>
-              <div style={{flex:1}}><div style={{fontFamily:T.sans,fontSize:13,fontWeight:700,color:T.text}}>{label}</div><div style={{fontFamily:T.sans,fontSize:11,color:T.muted}}>{sub}</div></div>
-              <ChevronRight size={13} color={T.muted}/>
+            <button key={v} onClick={()=>setView(v)} className="btn ch" style={{display:"flex",alignItems:"center",gap:10,padding:"11px 13px",borderRadius:12,border:"1px solid "+BORDER,background:"#fff",cursor:"pointer",textAlign:"left",boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{width:34,height:34,borderRadius:9,background:color+"14",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Icon size={14} color={color}/></div>
+              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700}}>{label}</div><div style={{fontSize:11,color:MUTED}}>{sub}</div></div>
+              <ChevronRight size={12} color={MUTED}/>
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:18,overflow:"hidden"}}>
-        <div style={{padding:"18px 24px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Últimas cotizaciones</span>
-          <button onClick={()=>setView("cotizador")} className="btn" style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:T.accent,background:"none",border:"none",cursor:"pointer",fontFamily:T.sans,fontWeight:700}}>Nueva <Plus size={13}/></button>
+      <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:16,overflow:"hidden",boxShadow:"0 1px 4px rgba(12,24,41,.05)"}}>
+        <div style={{padding:"16px 22px",borderBottom:"1px solid "+BORDER,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:14}}>Últimas cotizaciones</span>
+          <button onClick={()=>setView("cotizador")} className="btn" style={{display:"flex",alignItems:"center",gap:5,fontSize:12,color:A,fontFamily:SANS,fontWeight:700}}><Plus size={12}/>Nueva</button>
         </div>
         {recent.length===0
-          ?<div style={{padding:48,textAlign:"center",color:T.muted,fontFamily:T.sans,fontSize:13}}>Sin cotizaciones. <button onClick={()=>setView("cotizador")} style={{color:T.accent,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Crear →</button></div>
+          ?<div style={{padding:40,textAlign:"center",color:MUTED,fontSize:13}}>Sin cotizaciones. <button onClick={()=>setView("cotizador")} style={{color:A,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Crear →</button></div>
           :<table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
-              {["Folio","Cliente","Modo","Destino","Total","Fecha",""].map(h=><th key={h} style={{padding:"10px 18px",textAlign:"left",fontFamily:T.sans,fontSize:11,color:T.muted,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase"}}>{h}</th>)}
+            <thead><tr style={{borderBottom:"1px solid "+BORDER}}>
+              {["Folio","Cliente","Modo","Destino","Total","Fecha",""].map(h=><th key={h} style={{padding:"9px 16px",textAlign:"left",fontFamily:SANS,fontSize:10,color:MUTED,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{h}</th>)}
             </tr></thead>
             <tbody>
               {recent.map((q,i)=>(
-                <tr key={q.id||i} className="fade-row" style={{borderBottom:`1px solid ${T.border}`}}>
-                  <td style={{padding:"12px 18px",fontFamily:T.mono,fontSize:11,color:T.muted}}>{q.folio||"—"}</td>
-                  <td style={{padding:"12px 18px",fontFamily:T.sans,fontSize:13,fontWeight:700,color:T.text}}>{q.cliente||"—"}</td>
-                  <td style={{padding:"12px 18px"}}><Tag color={modeColor[q.modo]||T.accent}>{modeLabel[q.modo]||q.modo}</Tag></td>
-                  <td style={{padding:"12px 18px",fontFamily:T.sans,fontSize:12,color:T.muted}}>{q.destino||"—"}</td>
-                  <td style={{padding:"12px 18px",fontFamily:T.mono,fontSize:13,fontWeight:700,color:T.text}}>{fmt(q.total||0)}</td>
-                  <td style={{padding:"12px 18px",fontFamily:T.mono,fontSize:11,color:T.muted}}>{q.createdAt?.seconds?new Date(q.createdAt.seconds*1000).toLocaleDateString("es-MX"):"—"}</td>
-                  <td style={{padding:"12px 18px"}}><button onClick={()=>generateQuotePDF(q)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.muted}}><Printer size={13}/></button></td>
+                <tr key={q.id||i} className="fr" style={{borderBottom:"1px solid "+BORDER}}>
+                  <td style={{padding:"11px 16px",fontFamily:MONO,fontSize:10,color:MUTED}}>{q.folio||"—"}</td>
+                  <td style={{padding:"11px 16px",fontWeight:700,fontSize:13}}>{q.cliente||"—"}</td>
+                  <td style={{padding:"11px 16px"}}><Tag color={mC[q.modo]||A}>{mL[q.modo]||q.modo}</Tag></td>
+                  <td style={{padding:"11px 16px",fontSize:12,color:MUTED}}>{q.destino||"—"}</td>
+                  <td style={{padding:"11px 16px",fontFamily:MONO,fontSize:13,fontWeight:700}}>{fmt(q.total||0)}</td>
+                  <td style={{padding:"11px 16px",fontFamily:MONO,fontSize:10,color:MUTED}}>{q.createdAt?.seconds?new Date(q.createdAt.seconds*1000).toLocaleDateString("es-MX"):"—"}</td>
+                  <td style={{padding:"11px 16px"}}><button onClick={()=>printPDF(q)} className="btn" style={{color:MUTED}}><Printer size={12}/></button></td>
                 </tr>
               ))}
             </tbody>
@@ -673,846 +523,718 @@ function Dashboard({setView,cotizaciones,facturas,rutas,entregas}){
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   COTIZADOR PRO — EL MEJOR DE LA INDUSTRIA
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── COTIZADOR PRO ─────────────────────────────────────────────────────── */
 function Cotizador({onSaved}){
   const [modo,setModo]=useState("foraneo");
-  const [step,setStep]=useState("form"); // form | preview
+  const [step,setStep]=useState("form");
   const [saving,setSaving]=useState(false);
   const [toast,setToast]=useState(null);
-  const showToast=(msg,type="ok")=>{setToast({msg,type});};
+  const showT=(m,t="ok")=>setToast({msg:m,type:t});
 
-  // ── DATOS GENERALES ──
   const [cliente,setCliente]=useState("");
   const [contacto,setContacto]=useState("");
-  const [email,setEmail]=useState("");
   const [notas,setNotas]=useState("");
   const [plazo,setPlazo]=useState(3);
 
-  // ── FORÁNEO ──
-  const [forSearch,setForSearch]=useState("");
-  const [forDest,setForDest]=useState(null);
-  const [forVeh,setForVeh]=useState("cam");
-  const [forUrgente,setForUrgente]=useState(false);
-  const [forManiobra,setForManiobra]=useState(false);
-  const [forNumAyud,setForNumAyud]=useState(1);
-  const [forParadas,setForParadas]=useState(0);
-  const [forResguardo,setForResguardo]=useState(false);
-  const [forPersonasExtra,setForPersonasExtra]=useState(0);
-  const [forComida,setForComida]=useState(COMIDA_DEF);
-  const [forHotel,setForHotel]=useState(HOTEL_DEF);
+  // Foráneo
+  const [fSearch,setFSearch]=useState("");
+  const [fDest,setFDest]=useState(null);
+  const [fVeh,setFVeh]=useState("cam");
+  const [fUrg,setFUrg]=useState(false);
+  const [fMani,setFMani]=useState(false);
+  const [fNumAyud,setFNumAyud]=useState(1);
+  const [fParadas,setFParadas]=useState(0);
+  const [fRes,setFRes]=useState(false);
+  const [fExtra,setFExtra]=useState(0);
+  const [fComida,setFComida]=useState(COMIDA);
+  const [fHotel,setFHotel]=useState(HOTEL);
 
-  // ── LOCAL ──
-  const [locVeh,setLocVeh]=useState("cam");
-  const [locAyud,setLocAyud]=useState(false);
-  const [locUrgente,setLocUrgente]=useState(false);
-  const [locParadas,setLocParadas]=useState(0);
-  const [locResguardo,setLocResguardo]=useState(false);
+  // Local
+  const [lVeh,setLVeh]=useState("cam");
+  const [lAyud,setLAyud]=useState(false);
+  const [lUrg,setLUrg]=useState(false);
+  const [lParadas,setLParadas]=useState(0);
+  const [lRes,setLRes]=useState(false);
 
-  // ── MASIVO ──
-  const [masSearch,setMasSearch]=useState("");
-  const [masDest,setMasDest]=useState(null);
-  const [masLocal,setMasLocal]=useState(true);
-  const [masVeh,setMasVeh]=useState("cam");
-  const [masPDV,setMasPDV]=useState(500);
-  const [masMaxDia,setMasMaxDia]=useState(20);
-  const [masPersonasVan,setMasPersonasVan]=useState(1);
-  const [masAyudante,setMasAyudante]=useState(false);
-  const [masUrgente,setMasUrgente]=useState(false);
-  const [masComida,setMasComida]=useState(COMIDA_DEF);
-  const [masHotel,setMasHotel]=useState(HOTEL_DEF);
-  const fileRef=useRef();
+  // Masivo
+  const [mSearch,setMSearch]=useState("");
+  const [mDest,setMDest]=useState(null);
+  const [mLocal,setMLocal]=useState(true);
+  const [mVeh,setMVeh]=useState("cam");
+  const [mPDV,setMPDV]=useState(500);
+  const [mMaxDia,setMMaxDia]=useState(20);
+  const [mPersonas,setMPersonas]=useState(1);
+  const [mAyud,setMAyud]=useState(false);
+  const [mUrg,setMUrg]=useState(false);
+  const [mComida,setMComida]=useState(COMIDA);
+  const [mHotel,setMHotel]=useState(HOTEL);
 
-  /* ── CÁLCULOS FORÁNEO ── */
-  const forVD=VEHICULOS.find(v=>v.k===forVeh);
-  const forCrew=(forVD?.crew||1)+forPersonasExtra;
-  const forBase=forDest?forDest[forVeh]:0;
-  const {xComida:forXComida,xHotel:forXHotel,total:forXViatic,dias:forDias,noches:forNoches}=useMemo(()=>forDest?calcViaticos(forDest.km,forCrew,forComida,forHotel):{xComida:0,xHotel:0,total:0,dias:0,noches:0},[forDest,forCrew,forComida,forHotel]);
-  const forXUrg=forUrgente?forBase*0.35:0;
-  const forXMan=forManiobra?AYUD_COSTO*forNumAyud:0;
-  const forXPar=forParadas*ENTREGA_ADIC;
-  const forXRes=forResguardo?LOCALES[forVeh]?.resguardo||0:0;
-  const forSub=forBase+forXUrg+forXMan+forXPar+forXRes+forXViatic;
-  const forIva=forSub*.16;
-  const forTotal=forSub+forIva;
+  // ── CALC FORÁNEO ──
+  const fVD=VEHK.find(v=>v.k===fVeh);
+  const fCrew=(fVD?.crew||1)+fExtra;
+  const fBase=fDest?fDest[fVeh]:0;
+  const {xC:fXC,xH:fXH,total:fXV,dias:fDias,noches:fNoches}=useMemo(()=>fDest?calcViaticos(fDest.km,fCrew,fComida,fHotel):{xC:0,xH:0,total:0,dias:0,noches:0},[fDest,fCrew,fComida,fHotel]);
+  const fXU=fUrg?fBase*.35:0;
+  const fXM=fMani?AYUD*fNumAyud:0;
+  const fXP=fParadas*ADIC;
+  const fXR=fRes?(LOC[fVeh]?.resguardo||0):0;
+  const fSub=fBase+fXU+fXM+fXP+fXR+fXV;
+  const fIva=fSub*.16;
+  const fTot=fSub+fIva;
 
-  /* ── CÁLCULOS LOCAL ── */
-  const locD=LOCALES[locVeh];
-  let locBase=locD?.normal||0;
-  if(locUrgente&&locAyud) locBase=locD?.urgente_ay||locD?.ayudante||0;
-  else if(locAyud)        locBase=locD?.ayudante||0;
-  else if(locUrgente)     locBase=locD?.urgente||0;
-  const locXPar=locParadas*ENTREGA_ADIC;
-  const locXRes=locResguardo?locD?.resguardo||0:0;
-  const locSub=locBase+locXPar+locXRes;
-  const locIva=locSub*.16;
-  const locTotal=locSub+locIva;
+  // ── CALC LOCAL ── (tarifas exactas del Excel)
+  const lD=LOC[lVeh];
+  let lBase=lD.normal;
+  if(lUrg&&lAyud) lBase=lD.urgente_ay;
+  else if(lAyud)  lBase=lD.ayudante;
+  else if(lUrg)   lBase=lD.urgente;
+  const lXP=lParadas*ADIC;
+  const lXR=lRes?(lD.resguardo||0):0;
+  const lSub=lBase+lXP+lXR;
+  const lIva=lSub*.16;
+  const lTot=lSub+lIva;
 
-  /* ── CÁLCULOS MASIVO ── */
-  const {camionetas,dias:masDias,capDia}=useMemo(()=>calcFlota(masPDV,masMaxDia,plazo),[masPDV,masMaxDia,plazo]);
-  const masTotalPersonas=camionetas*(masPersonasVan+(masAyudante?1:0));
-  const masKm=!masLocal&&masDest?masDest.km:0;
-  const {xComida:masXComida,xHotel:masXHotel,total:masXViatic,noches:masNoches}=useMemo(()=>calcViaticos(masKm,masTotalPersonas,masComida,masHotel),[masKm,masTotalPersonas,masComida,masHotel]);
-  const masBase=(!masLocal&&masDest)?masDest[masVeh]*camionetas:0;
-  const masXUrg=masUrgente?masBase*.35:0;
-  const masSub=masBase+masXUrg+masXViatic;
-  const masIva=masSub*.16;
-  const masTotal=masSub+masIva;
+  // ── CALC MASIVO ──
+  const {vans,dias:mDias,capDia}=useMemo(()=>calcFlota(mPDV,mMaxDia,plazo),[mPDV,mMaxDia,plazo]);
+  const mPersonasT=vans*(mPersonas+(mAyud?1:0));
+  const mKm=!mLocal&&mDest?mDest.km:0;
+  const {xC:mXC,xH:mXH,total:mXV,noches:mNoches}=useMemo(()=>calcViaticos(mKm,mPersonasT,mComida,mHotel),[mKm,mPersonasT,mComida,mHotel]);
+  const mBase=(!mLocal&&mDest)?mDest[mVeh]*vans:0;
+  const mXU=mUrg?mBase*.35:0;
+  const mSub=mBase+mXU+mXV;
+  const mIva=mSub*.16;
+  const mTot=mSub+mIva;
 
-  const total=modo==="foraneo"?forTotal:modo==="local"?locTotal:masTotal;
-  const canQ=modo==="foraneo"?!!forDest:modo==="local"?true:masPDV>0;
+  const total=modo==="foraneo"?fTot:modo==="local"?lTot:mTot;
+  const canQ=modo==="foraneo"?!!fDest:modo==="masivo"?mPDV>0:true;
 
-  /* ── BUILD QUOTE OBJECT ── */
-  const buildQuote=()=>{
-    const folio="COT-"+Date.now().toString(36).slice(-6).toUpperCase();
-    const base={cliente,contacto,email,notas,modo,folio,total,plazo};
-    if(modo==="foraneo")return{...base,
-      destino:forDest?.c,km:forDest?.km,vehiculoLabel:forVD?.label,
-      stops:forDest?[{city:"Ciudad de México"},{city:forDest?.c}]:[],
+  const buildQ=()=>{
+    const folio="COT-"+uid();
+    const base={cliente,contacto,notas,modo,folio,total,plazo};
+    if(modo==="foraneo") return{...base,destino:fDest?.c,km:fDest?.km,vehiculoLabel:fVD?.label,
+      modoLabel:"FORÁNEO",
+      stops:[{city:"Ciudad de México"},{city:fDest?.c}],
       lines:[
-        {label:`Tarifa base · ${forDest?.c}`,value:fmt(forBase)},
-        forUrgente&&{label:"⚡ Urgente +35%",value:`+${fmt(forXUrg)}`,color:T.rose},
-        forManiobra&&{label:`💪 Ayudantes (${forNumAyud})`,value:`+${fmt(forXMan)}`,color:T.violet},
-        forParadas>0&&{label:`📦 Paradas extra (${forParadas})`,value:`+${fmt(forXPar)}`,color:T.blue},
-        forResguardo&&{label:"🛡️ Resguardo 1 día",value:`+${fmt(forXRes)}`,color:T.green},
-        forXComida>0&&{label:`🍽️ Comidas · ${forCrew}p × ${forDias}d`,value:`+${fmt(forXComida)}`,color:T.amber},
-        forXHotel>0&&{label:`🏨 Hotel · ${forCrew}p × ${forNoches}n`,value:`+${fmt(forXHotel)}`,color:T.blue},
-        {label:"Subtotal sin IVA",value:fmt(forSub)},
-        {label:"IVA 16%",value:fmt(forIva),color:T.muted},
-        {label:"TOTAL CON IVA",value:fmt(forTotal),bold:true,color:T.accent},
-      ].filter(Boolean),
-    };
-    if(modo==="local")return{...base,
-      destino:"Ciudad de México",vehiculoLabel:VEHICULOS.find(v=>v.k===locVeh)?.label,
+        {label:"Tarifa base · "+fDest?.c,value:fmt(fBase)},
+        fUrg&&{label:"⚡ Urgente +35%",value:"+"+fmt(fXU),color:ROSE},
+        fMani&&{label:"💪 Ayudantes ("+fNumAyud+")",value:"+"+fmt(fXM),color:VIOLET},
+        fParadas>0&&{label:"📦 Paradas extra ("+fParadas+")",value:"+"+fmt(fXP),color:BLUE},
+        fRes&&{label:"🛡️ Resguardo 1 día",value:"+"+fmt(fXR),color:GREEN},
+        fXC>0&&{label:"🍽️ Comidas · "+fCrew+"p × "+fDias+"d",value:"+"+fmt(fXC),color:AMBER},
+        fXH>0&&{label:"🏨 Hotel · "+fCrew+"p × "+fNoches+"n",value:"+"+fmt(fXH),color:BLUE},
+        {label:"Subtotal sin IVA",value:fmt(fSub)},
+        {label:"IVA 16%",value:fmt(fIva),color:MUTED},
+        {label:"TOTAL CON IVA",value:fmt(fTot),bold:true,color:A},
+      ].filter(Boolean)};
+    if(modo==="local") return{...base,destino:"Ciudad de México",vehiculoLabel:VEHK.find(v=>v.k===lVeh)?.label,
+      modoLabel:"LOCAL CDMX",
       lines:[
-        {label:`${VEHICULOS.find(v=>v.k===locVeh)?.label} · ${locUrgente?"Urgente":"Normal"}${locAyud?" + Ayudante":""}`,value:fmt(locBase)},
-        locParadas>0&&{label:`Paradas extra (${locParadas})`,value:`+${fmt(locXPar)}`,color:T.blue},
-        locResguardo&&{label:"Resguardo 1 día",value:`+${fmt(locXRes)}`,color:T.green},
-        {label:"Subtotal sin IVA",value:fmt(locSub)},
-        {label:"IVA 16%",value:fmt(locIva),color:T.muted},
-        {label:"TOTAL CON IVA",value:fmt(locTotal),bold:true,color:T.accent},
-      ].filter(Boolean),
-    };
-    return{...base,
-      destino:masLocal?"Local":masDest?.c,vehiculoLabel:VEHICULOS.find(v=>v.k===masVeh)?.label,
-      totalPDV:masPDV,flota:{camionetas,dias:masDias,capDia},
+        {label:VEHK.find(v=>v.k===lVeh)?.label+" · "+(lUrg?"Urgente":"Normal")+(lAyud?" + Ayudante":""),value:fmt(lBase)},
+        lParadas>0&&{label:"📦 Paradas extra ("+lParadas+")",value:"+"+fmt(lXP),color:BLUE},
+        lRes&&{label:"🛡️ Resguardo 1 día",value:"+"+fmt(lXR),color:GREEN},
+        {label:"Subtotal sin IVA",value:fmt(lSub)},
+        {label:"IVA 16%",value:fmt(lIva),color:MUTED},
+        {label:"TOTAL CON IVA",value:fmt(lTot),bold:true,color:A},
+      ].filter(Boolean)};
+    return{...base,destino:mLocal?"Local CDMX":mDest?.c,vehiculoLabel:VEHK.find(v=>v.k===mVeh)?.label,
+      modoLabel:"DISTRIBUCIÓN MASIVA",
+      totalPDV:mPDV,flota:{vans,dias:mDias,capDia},
       lines:[
-        masBase>0&&{label:`Tarifa transporte × ${camionetas}`,value:fmt(masBase)},
-        masUrgente&&{label:"⚡ Urgente +35%",value:`+${fmt(masXUrg)}`,color:T.rose},
-        masXComida>0&&{label:`🍽️ Comidas · ${masTotalPersonas} personas`,value:`+${fmt(masXComida)}`,color:T.amber},
-        masXHotel>0&&{label:`🏨 Hotel personal`,value:`+${fmt(masXHotel)}`,color:T.blue},
-        {label:"Subtotal sin IVA",value:fmt(masSub)},
-        {label:"IVA 16%",value:fmt(masIva),color:T.muted},
-        {label:"TOTAL CON IVA",value:fmt(masTotal),bold:true,color:T.accent},
-      ].filter(Boolean),
-    };
+        mBase>0&&{label:"Tarifa transporte × "+vans+" vans",value:fmt(mBase)},
+        mUrg&&{label:"⚡ Urgente +35%",value:"+"+fmt(mXU),color:ROSE},
+        mXC>0&&{label:"🍽️ Comidas · "+mPersonasT+" personas",value:"+"+fmt(mXC),color:AMBER},
+        mXH>0&&{label:"🏨 Hotel personal",value:"+"+fmt(mXH),color:BLUE},
+        {label:"Subtotal sin IVA",value:fmt(mSub)},
+        {label:"IVA 16%",value:fmt(mIva),color:MUTED},
+        {label:"TOTAL CON IVA",value:fmt(mTot),bold:true,color:A},
+      ].filter(Boolean)};
   };
 
   const handleSave=async()=>{
     setSaving(true);
-    try{
-      const q=buildQuote();
-      await addDoc(collection(db,"cotizaciones"),{...q,createdAt:serverTimestamp()});
-      onSaved&&onSaved();
-      showToast("✓ Cotización guardada en Firebase");
-    }catch(e){showToast(e.message,"err");}
+    try{await addDoc(collection(db,"cotizaciones"),{...buildQ(),createdAt:serverTimestamp()});onSaved&&onSaved();showT("✓ Cotización guardada");}
+    catch(e){showT(e.message,"err");}
     setSaving(false);
   };
 
-  const handlePDF=()=>generateQuotePDF(buildQuote());
-
-  /* ── RENDER ROWS ── */
-  const Row=({l,v,c=T.text,bold,icon:Icon})=>(
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:`${bold?13:8}px 0`,borderBottom:bold?"none":`1px solid ${T.border}`}}>
-      <div style={{display:"flex",alignItems:"center",gap:6}}>
-        {Icon&&<Icon size={11} color={T.muted}/>}
-        <span style={{fontFamily:T.sans,fontSize:bold?14:12,fontWeight:bold?800:400,color:bold?T.text:T.muted}}>{l}</span>
-      </div>
-      <span style={{fontFamily:T.mono,fontSize:bold?22:12,fontWeight:700,color:c}}>{v}</span>
+  // Row component for preview
+  const Row=({l,v,c=TEXT,bold})=>(
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:(bold?"13":"8")+"px 0",borderBottom:bold?"none":"1px solid "+BORDER}}>
+      <span style={{fontSize:bold?14:12,fontWeight:bold?800:400,color:bold?TEXT:MUTED}}>{l}</span>
+      <span style={{fontFamily:MONO,fontSize:bold?22:12,fontWeight:700,color:c}}>{v}</span>
     </div>
   );
 
   return(
-    <div style={{flex:1,overflowY:"auto",background:"#ffffff",fontFamily:T.sans}}>
+    <div style={{flex:1,overflowY:"auto",background:"#ffffff",display:"flex",flexDirection:"column"}}>
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
 
-      {/* TOP BAR */}
-      <div style={{borderBottom:`1px solid ${T.border}`,padding:"20px 36px",background:"#ffffff",position:"sticky",top:0,zIndex:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      {/* STICKY HEADER */}
+      <div style={{background:"#ffffff",borderBottom:"1px solid "+BORDER,padding:"18px 34px",position:"sticky",top:0,zIndex:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <h1 style={{fontFamily:T.display,fontWeight:800,fontSize:24,color:T.text,letterSpacing:"-0.02em"}}>Cotizador Pro</h1>
-          <p style={{color:T.muted,fontSize:12,marginTop:2}}>Actualización automática · Viáticos incluidos · PDF instantáneo</p>
+          <h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:24,color:TEXT,letterSpacing:"-0.02em"}}>Cotizador Pro</h1>
+          <p style={{color:MUTED,fontSize:12,marginTop:2}}>Tarifas 2026 · Viáticos automáticos · PDF profesional</p>
         </div>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          {step==="preview"&&<button onClick={()=>setStep("form")} className="btn" style={{display:"flex",alignItems:"center",gap:6,border:`1.5px solid ${T.border2}`,background:"transparent",color:T.muted,borderRadius:10,padding:"8px 16px",cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:600,whiteSpace:"nowrap"}}><RefreshCw size={12}/>Nueva cotización</button>}
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",background:T.accentDim,borderRadius:20,border:`1px solid ${T.accent}20`}}>
-            <div style={{width:7,height:7,borderRadius:"50%",background:T.green,boxShadow:`0 0 6px ${T.green}`}}/>
-            <span style={{fontSize:11,fontWeight:600,color:T.accent,fontFamily:T.mono,letterSpacing:"0.03em"}}>EN VIVO</span>
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          {step==="preview"&&<button onClick={()=>setStep("form")} className="btn" style={{display:"flex",alignItems:"center",gap:6,border:"1.5px solid "+BORDER2,borderRadius:9,padding:"8px 15px",fontSize:13,fontWeight:600,color:MUTED}}><RefreshCw size={12}/>Nueva</button>}
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"6px 13px",background:"#fff8f3",borderRadius:20,border:"1px solid "+A+"22"}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:GREEN,boxShadow:"0 0 6px "+GREEN}}/>
+            <span style={{fontSize:10,fontWeight:700,color:A,fontFamily:MONO,letterSpacing:"0.04em"}}>ACTUALIZACIÓN EN VIVO</span>
           </div>
         </div>
       </div>
 
-      <div style={{padding:"28px 36px"}}>
+      {/* MODO TABS */}
+      <div style={{padding:"16px 34px 0",background:"#ffffff"}}>
+        <div style={{display:"flex",background:"#f5f7fc",borderRadius:13,padding:3,width:"fit-content",gap:2}}>
+          {[{id:"local",label:"📍 Local CDMX",color:GREEN},{id:"foraneo",label:"🚛 Foráneo",color:A},{id:"masivo",label:"📦 Distribución Masiva",color:BLUE}].map(({id,label,color})=>(
+            <button key={id} onClick={()=>{setModo(id);setStep("form");}} className="btn"
+              style={{padding:"9px 18px",borderRadius:10,background:modo===id?"#ffffff":"transparent",color:modo===id?color:MUTED,fontFamily:SANS,fontSize:13,fontWeight:modo===id?700:500,boxShadow:modo===id?"0 1px 6px rgba(12,24,41,.1)":"none",transition:"all .13s"}}>
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* MODO SELECTOR */}
-      <div style={{display:"flex",background:"#ffffff",border:`1.5px solid ${T.border}`,borderRadius:14,padding:4,width:"fit-content",gap:2,marginBottom:22}}>
-        {[
-          {id:"local",label:"📍 Local CDMX",color:T.green},
-          {id:"foraneo",label:"🚛 Foráneo",color:T.accent},
-          {id:"masivo",label:"📦 Distribución Masiva",color:T.blue},
-        ].map(({id,label,color})=>(
-          <button key={id} onClick={()=>{setModo(id);setStep("form");}} className="btn" style={{display:"flex",alignItems:"center",gap:7,padding:"9px 18px",borderRadius:11,border:"none",cursor:"pointer",transition:"all .15s",background:modo===id?`${color}16`:"transparent",color:modo===id?color:T.muted,fontFamily:T.sans,fontSize:13,fontWeight:modo===id?700:500}}>
-            {label}
-          </button>
-        ))}
-      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 370px",gap:18,padding:"20px 34px",alignItems:"start"}}>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 380px",gap:18,alignItems:"start"}}>
-
-        {/* ── LEFT COLUMN: FORM ── */}
+        {/* ── LEFT: FORMULARIO ── */}
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-          {/* CLIENT INFO */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Información del cliente</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <Input label="Empresa / Cliente *" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Ej: Walmart México"/>
-              <Input label="Nombre de contacto" value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Ej: Luis Hernández"/>
-              <Input label="Email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="contacto@empresa.com"/>
-              <Stepper label="Plazo de entrega (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
+          {/* CLIENTE */}
+          <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+            <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Información del cliente</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}>
+              <Inp label="Empresa / Cliente *" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Ej: Walmart México"/>
+              <Inp label="Contacto" value={contacto} onChange={e=>setContacto(e.target.value)} placeholder="Nombre del contacto"/>
+              <Spin label="Plazo de entrega (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
             </div>
           </div>
 
           {/* ══ FORÁNEO ══ */}
           {modo==="foraneo"&&<>
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Destino <span style={{color:T.rose}}>*</span></div>
-              {forDest?(
-                <div style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",background:`${T.accent}0d`,border:`1.5px solid ${T.accent}28`,borderRadius:12}}>
-                  <MapPin size={16} color={T.accent}/>
-                  <div style={{flex:1}}>
-                    <div style={{fontFamily:T.display,fontWeight:700,fontSize:18,color:T.text}}>{forDest.c}</div>
-                    <div style={{fontFamily:T.mono,fontSize:11,color:T.muted}}>{forDest.km.toLocaleString()} km · {calcDias(forDest.km).camino} días camino · {calcDias(forDest.km).noches} noches</div>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Destino <span style={{color:ROSE}}>*</span></div>
+              {fDest
+                ?<div style={{display:"flex",alignItems:"center",gap:11,padding:"13px 15px",background:A+"08",border:"1.5px solid "+A+"28",borderRadius:11}}>
+                    <MapPin size={15} color={A}/>
+                    <div style={{flex:1}}>
+                      <div style={{fontFamily:DISPLAY,fontWeight:700,fontSize:17,color:TEXT}}>{fDest.c}</div>
+                      <div style={{fontFamily:MONO,fontSize:10,color:MUTED}}>{fDest.km.toLocaleString()} km · {diasRuta(fDest.km).ida} días camino · {diasRuta(fDest.km).noches} noches hotel</div>
+                    </div>
+                    <button onClick={()=>setFDest(null)} className="btn" style={{width:24,height:24,borderRadius:"50%",border:"1px solid "+BORDER2,display:"flex",alignItems:"center",justifyContent:"center",color:MUTED}}><X size={11}/></button>
                   </div>
-                  <button onClick={()=>setForDest(null)} className="btn" style={{width:26,height:26,borderRadius:"50%",border:`1px solid ${T.border2}`,background:"transparent",cursor:"pointer",color:T.muted,display:"flex",alignItems:"center",justifyContent:"center"}}><X size={12}/></button>
-                </div>
-              ):(
-                <CitySearch placeholder={`Busca entre ${TARIFA.length} destinos…`} value={forSearch} onChange={setForSearch} onSelect={t=>{setForDest(t);setForSearch("");}} vehiculo={forVeh}/>
-              )}
+                :<CitySearch value={fSearch} onChange={setFSearch} onSelect={t=>{setFDest(t);setFSearch("");}} veh={fVeh}/>
+              }
             </div>
 
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Vehículo</div>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                {VEHICULOS.map(v=>{
-                  const a=forVeh===v.k;
+                {VEHK.map(v=>{
+                  const a=fVeh===v.k;
                   return(
-                    <button key={v.k} onClick={()=>setForVeh(v.k)} className="btn" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:11,border:`1.5px solid ${a?T.accent:T.border2}`,background:a?`${T.accent}0d`:"transparent",cursor:"pointer",transition:"all .15s"}}>
-                      <span style={{fontSize:18}}>{v.icon}</span>
-                      <div style={{flex:1,textAlign:"left"}}>
-                        <div style={{fontSize:13,fontWeight:700,color:a?T.text:T.muted}}>{v.label}</div>
-                        <div style={{fontSize:11,color:T.muted}}>{v.cap} · {v.crew} persona{v.crew>1?"s":""} tripulación</div>
-                      </div>
-                      {forDest&&<span style={{fontFamily:T.mono,fontSize:12,fontWeight:700,color:a?T.accent:T.muted}}>{fmt(forDest[v.k])}</span>}
-                      {a&&<Check size={13} color={T.accent}/>}
+                    <button key={v.k} onClick={()=>setFVeh(v.k)} className="btn" style={{display:"flex",alignItems:"center",gap:11,padding:"9px 13px",borderRadius:10,border:"1.5px solid "+(a?A:BORDER2),background:a?A+"08":"#fff",cursor:"pointer",transition:"all .13s"}}>
+                      <span style={{fontSize:17}}>{v.icon}</span>
+                      <div style={{flex:1,textAlign:"left"}}><div style={{fontSize:13,fontWeight:700,color:a?TEXT:MUTED}}>{v.label}</div><div style={{fontSize:11,color:MUTED}}>{v.cap} · {v.crew} persona(s) base</div></div>
+                      {fDest&&<span style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:a?A:MUTED}}>{fmt(fDest[v.k])}</span>}
+                      {a&&<Check size={12} color={A}/>}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-                <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Viáticos del personal</div>
-                {forDias>0&&<Tag color={T.blue}>{forDias} días fuera · {forNoches} noches hotel</Tag>}
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:13}}>
+                <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase"}}>Viáticos del personal</div>
+                {fDias>0&&<Tag color={BLUE}>{fDias} días fuera · {fNoches} noches</Tag>}
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:13}}>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comidas / persona / día</div>
-                  <input type="number" value={forComida} onChange={e=>setForComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Comida/persona/día</div>
+                  <input type="number" value={fComida} onChange={e=>setFComida(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
                 </div>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel / persona / noche</div>
-                  <input type="number" value={forHotel} onChange={e=>setForHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Hotel/persona/noche</div>
+                  <input type="number" value={fHotel} onChange={e=>setFHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
                 </div>
               </div>
-              <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"#ffffff",borderRadius:10,border:`1px solid ${T.border}`,marginBottom:14}}>
-                <Users size={14} color={T.blue}/>
-                <span style={{flex:1,fontSize:12}}>Tripulación base: <strong>{forVD?.crew||1} persona{(forVD?.crew||1)>1?"s":""}</strong></span>
-                <Stepper value={forPersonasExtra} onChange={setForPersonasExtra} min={0} max={8}/>
-                <span style={{fontSize:12,color:T.muted,whiteSpace:"nowrap"}}>extras</span>
+              <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",background:"#f8fafd",borderRadius:9,border:"1px solid "+BORDER,marginBottom:13}}>
+                <Users size={13} color={BLUE}/>
+                <span style={{flex:1,fontSize:12}}>Tripulación base: <strong>{fVD?.crew||1}</strong> persona(s)</span>
+                <Spin value={fExtra} onChange={setFExtra} min={0} max={8}/>
+                <span style={{fontSize:11,color:MUTED,whiteSpace:"nowrap"}}>extras</span>
               </div>
-              {forDias>0&&(
-                <div style={{padding:"10px 14px",background:`${T.blue}0a`,borderRadius:10,border:`1px solid ${T.blue}20`}}>
-                  <div style={{fontSize:11,color:T.blue,fontWeight:600}}>{forCrew} personas × {forDias} días × ${forComida}/comida + {forNoches} noches × ${forHotel}/hotel</div>
-                  <div style={{fontFamily:T.mono,fontSize:15,fontWeight:700,color:T.blue,marginTop:4}}>Viáticos totales: {fmt(forXViatic)}</div>
-                </div>
-              )}
+              {fDias>0&&<div style={{padding:"9px 13px",background:BLUE+"08",borderRadius:9,border:"1px solid "+BLUE+"18"}}>
+                <div style={{fontSize:11,color:BLUE,fontWeight:600}}>{fCrew}p × {fDias}d × ${fComida}/comida{fNoches>0?" + "+fNoches+"n × $"+fHotel+"/hotel":""}</div>
+                <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:BLUE,marginTop:3}}>Viáticos: {fmt(fXV)}</div>
+              </div>}
             </div>
 
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Servicios adicionales</div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                <Toggle checked={forUrgente} onChange={setForUrgente} label="⚡ Viaje urgente" sub={forUrgente?`+35% → +${fmt(forXUrg)}`:"Sin cargo adicional"} accent={T.rose}/>
-                <Toggle checked={forManiobra} onChange={setForManiobra} label="💪 Maniobras / Ayudantes en destino" sub="$2,800 por ayudante" accent={T.violet}/>
-                {forManiobra&&<div style={{paddingLeft:32,display:"flex",alignItems:"center",gap:12}}><span style={{fontSize:12,color:T.muted}}>Cantidad:</span><Stepper value={forNumAyud} onChange={setForNumAyud} min={1} max={10}/><span style={{fontFamily:T.mono,fontSize:12,color:T.violet,fontWeight:700}}>{fmt(forXMan)}</span></div>}
-                <div style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,border:`1.5px solid ${T.border2}`}}>
-                  <Package size={15} color={T.blue}/>
-                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Paradas adicionales en ruta</div><div style={{fontSize:11,color:T.muted}}>$1,200 por entrega extra</div></div>
-                  <Stepper value={forParadas} onChange={setForParadas} min={0} max={50}/>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Servicios adicionales</div>
+              <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                <Tog checked={fUrg} onChange={setFUrg} label="⚡ Viaje urgente (+35%)" sub={fUrg?"+"+fmt(fXU):"Sin cargo adicional"} color={ROSE}/>
+                <Tog checked={fMani} onChange={setFMani} label="💪 Maniobras / Ayudantes en destino" sub={"$"+AYUD.toLocaleString()+" por ayudante"} color={VIOLET}/>
+                {fMani&&<div style={{paddingLeft:30,display:"flex",alignItems:"center",gap:10}}>
+                  <span style={{fontSize:12,color:MUTED}}>Cantidad:</span>
+                  <Spin value={fNumAyud} onChange={setFNumAyud} min={1} max={10}/>
+                  <span style={{fontFamily:MONO,fontSize:12,color:VIOLET,fontWeight:700}}>{fmt(fXM)}</span>
+                </div>}
+                <div style={{display:"flex",alignItems:"center",gap:11,padding:"10px 13px",borderRadius:11,border:"1.5px solid "+BORDER2}}>
+                  <Package size={13} color={BLUE}/>
+                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Paradas adicionales en ruta</div><div style={{fontSize:11,color:MUTED}}>$1,200 por entrega extra</div></div>
+                  <Spin value={fParadas} onChange={setFParadas} min={0} max={50}/>
                 </div>
-                <Toggle checked={forResguardo} onChange={setForResguardo} label="🛡️ Resguardo de materiales (1 día)" sub={fmt(LOCALES[forVeh]?.resguardo||0)} accent={T.green}/>
+                <Tog checked={fRes} onChange={setFRes} label={"🛡️ Resguardo de materiales (1 día) — "+fmt(LOC[fVeh]?.resguardo||0)} sub="" color={GREEN}/>
               </div>
             </div>
           </>}
 
           {/* ══ LOCAL ══ */}
           {modo==="local"&&<>
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo</div>
-              <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                {VEHICULOS.map(v=>{
-                  const a=locVeh===v.k;const tar=LOCALES[v.k];
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Vehículo</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginBottom:16}}>
+                {VEHK.map(v=>{
+                  const a=lVeh===v.k; const tar=LOC[v.k];
                   return(
-                    <button key={v.k} onClick={()=>setLocVeh(v.k)} className="btn" style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:11,border:`1.5px solid ${a?T.accent:T.border2}`,background:a?`${T.accent}0d`:"transparent",cursor:"pointer"}}>
-                      <span style={{fontSize:18}}>{v.icon}</span>
-                      <div style={{flex:1,textAlign:"left"}}><div style={{fontSize:13,fontWeight:700,color:a?T.text:T.muted}}>{v.label}</div><div style={{fontSize:11,color:T.muted}}>{v.cap}</div></div>
-                      <span style={{fontFamily:T.mono,fontSize:12,fontWeight:700,color:a?T.accent:T.muted}}>{fmt(tar?.normal||0)}</span>
-                      {a&&<Check size={13} color={T.accent}/>}
+                    <button key={v.k} onClick={()=>setLVeh(v.k)} className="btn" style={{display:"flex",alignItems:"center",gap:9,padding:"10px 12px",borderRadius:11,border:"1.5px solid "+(a?A:BORDER2),background:a?A+"08":"#fff",cursor:"pointer",transition:"all .13s"}}>
+                      <span style={{fontSize:20}}>{v.icon}</span>
+                      <div style={{flex:1,textAlign:"left"}}>
+                        <div style={{fontSize:12,fontWeight:700,color:a?TEXT:MUTED}}>{v.label}</div>
+                        <div style={{fontFamily:MONO,fontSize:12,fontWeight:700,color:a?A:MUTED}}>{fmt(tar?.normal||0)}</div>
+                      </div>
+                      {a&&<Check size={12} color={A}/>}
                     </button>
                   );
                 })}
               </div>
-            </div>
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Servicios</div>
-              <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                <Toggle checked={locUrgente} onChange={setLocUrgente} label="⚡ Viaje urgente" sub={`${fmt(LOCALES[locVeh]?.urgente||0)} tarifa urgente`} accent={T.rose}/>
-                <Toggle checked={locAyud} onChange={setLocAyud} label="💪 Con ayudante / maniobras" sub={`${fmt(LOCALES[locVeh]?.ayudante||0)} con ayudante`} accent={T.violet}/>
-                <div style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",borderRadius:12,border:`1.5px solid ${T.border2}`}}>
-                  <Package size={15} color={T.blue}/>
-                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Paradas adicionales</div><div style={{fontSize:11,color:T.muted}}>$1,200 por entrega</div></div>
-                  <Stepper value={locParadas} onChange={setLocParadas} min={0} max={50}/>
+              {/* TABLA DE TARIFAS LOCALES */}
+              <div style={{background:"#f8fafd",borderRadius:11,padding:"12px 14px",border:"1px solid "+BORDER,marginBottom:14}}>
+                <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:10}}>Tarifas {VEHK.find(v=>v.k===lVeh)?.label}</div>
+                {[
+                  ["Viaje normal",LOC[lVeh]?.normal],
+                  ["Con ayudante",LOC[lVeh]?.ayudante],
+                  ["Urgente",LOC[lVeh]?.urgente],
+                  ["Urgente + ayudante",LOC[lVeh]?.urgente_ay],
+                  ["Resguardo 1 día",LOC[lVeh]?.resguardo],
+                  LOC[lVeh]?.renta_dia&&["Renta/día sin chofer",LOC[lVeh]?.renta_dia],
+                  LOC[lVeh]?.renta_chofer&&["Renta/día con chofer",LOC[lVeh]?.renta_chofer],
+                  LOC[lVeh]?.renta_mes&&["Renta/mes sin chofer",LOC[lVeh]?.renta_mes],
+                ].filter(Boolean).map(([l,v])=>(
+                  <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom:"1px solid "+BORDER,fontSize:12}}>
+                    <span style={{color:MUTED}}>{l}</span>
+                    <span style={{fontFamily:MONO,fontWeight:700,color:TEXT}}>{fmt(v)}</span>
+                  </div>
+                ))}
+                <div style={{fontSize:10,color:MUTED,marginTop:8,fontWeight:600}}>+ Entrega adicional en ruta: {fmt(ADIC)}</div>
+              </div>
+              <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                <Tog checked={lUrg} onChange={setLUrg} label="⚡ Viaje urgente" sub={"Tarifa: "+fmt(LOC[lVeh]?.urgente)} color={ROSE}/>
+                <Tog checked={lAyud} onChange={setLAyud} label="💪 Con ayudante / maniobras" sub={"Tarifa: "+fmt(LOC[lVeh]?.ayudante)} color={VIOLET}/>
+                <div style={{display:"flex",alignItems:"center",gap:11,padding:"10px 13px",borderRadius:11,border:"1.5px solid "+BORDER2}}>
+                  <Package size={13} color={BLUE}/>
+                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Paradas adicionales</div><div style={{fontSize:11,color:MUTED}}>$1,200 por entrega</div></div>
+                  <Spin value={lParadas} onChange={setLParadas} min={0} max={50}/>
                 </div>
-                <Toggle checked={locResguardo} onChange={setLocResguardo} label="🛡️ Resguardo 1 día" sub={fmt(LOCALES[locVeh]?.resguardo||0)} accent={T.green}/>
+                <Tog checked={lRes} onChange={setLRes} label={"🛡️ Resguardo 1 día — "+fmt(LOC[lVeh]?.resguardo||0)} sub="" color={GREEN}/>
               </div>
             </div>
           </>}
 
           {/* ══ MASIVO ══ */}
           {modo==="masivo"&&<>
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Puntos de Distribución</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Puntos de distribución</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Total de PDVs</div>
-                  <input type="number" value={masPDV} onChange={e=>setMasPDV(Math.max(1,parseInt(e.target.value)||1))} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"10px 12px",color:T.accent,fontFamily:T.mono,fontSize:22,fontWeight:700,outline:"none",textAlign:"center"}}/>
+                  <div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Total de PDVs</div>
+                  <input type="number" value={mPDV} onChange={e=>setMPDV(Math.max(1,parseInt(e.target.value)||1))} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"10px 12px",fontFamily:MONO,fontSize:22,fontWeight:700,color:A,textAlign:"center"}}/>
                 </div>
-                <Stepper label="Plazo máximo (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
+                <Spin label="Plazo máximo (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
               </div>
             </div>
-
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Configuración de flota</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
-                <Stepper label="Entregas máx/camioneta/día" value={masMaxDia} onChange={setMasMaxDia} min={1} max={300}/>
-                <Stepper label="Personas por camioneta" value={masPersonasVan} onChange={setMasPersonasVan} min={1} max={5}/>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Configuración de flota</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:13}}>
+                <Spin label="Entregas máx/van/día" value={mMaxDia} onChange={setMMaxDia} min={1} max={300}/>
+                <Spin label="Personas por van" value={mPersonas} onChange={setMPersonas} min={1} max={5}/>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-                <InfoBox icon={Truck} color={T.accent} title="Camionetas" value={camionetas} sub={`para cumplir ${plazo} días`} xs/>
-                <InfoBox icon={Calendar} color={T.blue} title="Días operación" value={masDias} sub={`${capDia.toLocaleString()}/día`} xs/>
-                <InfoBox icon={Users} color={T.violet} title="Personal" value={masTotalPersonas} sub={`${masPersonasVan+(masAyudante?1:0)}/van`} xs/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:13}}>
+                <InfoBox icon={Truck} color={A} title="Vans necesarias" value={vans} sub={"para "+plazo+" días"}/>
+                <InfoBox icon={Calendar} color={BLUE} title="Días operación" value={mDias} sub={capDia+"/día"}/>
+                <InfoBox icon={Users} color={VIOLET} title="Personal total" value={mPersonasT}/>
               </div>
-              <Toggle checked={masAyudante} onChange={setMasAyudante} label="💪 Ayudante por camioneta" sub="Personal de apoyo adicional" accent={T.violet}/>
-              <div style={{marginTop:8}}/>
-              <Toggle checked={masUrgente} onChange={setMasUrgente} label="⚡ Servicio urgente (+35%)" sub="Aplica sobre tarifa de transporte" accent={T.rose}/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+                <Tog checked={mAyud} onChange={setMAyud} label="💪 Ayudante/van" color={VIOLET}/>
+                <Tog checked={mUrg} onChange={setMUrg} label="⚡ Urgente +35%" color={ROSE}/>
+              </div>
             </div>
-
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Tipo de distribución</div>
-              <div style={{display:"flex",gap:8,marginBottom:14}}>
-                <button onClick={()=>setMasLocal(true)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:`2px solid ${masLocal?T.accent:T.border2}`,background:masLocal?`${T.accent}0d`:"transparent",color:masLocal?T.accent:T.muted,cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:masLocal?700:500}}>📍 Local / Una ciudad</button>
-                <button onClick={()=>setMasLocal(false)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:`2px solid ${!masLocal?T.accent:T.border2}`,background:!masLocal?`${T.accent}0d`:"transparent",color:!masLocal?T.accent:T.muted,cursor:"pointer",fontFamily:T.sans,fontSize:13,fontWeight:!masLocal?700:500}}>🗺️ Foráneo / Viaje</button>
+            <div style={{background:"#ffffff",border:"1px solid "+BORDER,borderRadius:15,padding:20,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+              <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Tipo de distribución</div>
+              <div style={{display:"flex",gap:8,marginBottom:13}}>
+                <button onClick={()=>setMLocal(true)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:"2px solid "+(mLocal?A:BORDER2),background:mLocal?A+"08":"#fff",color:mLocal?A:MUTED,fontFamily:SANS,fontSize:13,fontWeight:mLocal?700:500}}>📍 Local</button>
+                <button onClick={()=>setMLocal(false)} className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,border:"2px solid "+(!mLocal?A:BORDER2),background:!mLocal?A+"08":"#fff",color:!mLocal?A:MUTED,fontFamily:SANS,fontSize:13,fontWeight:!mLocal?700:500}}>🗺️ Foráneo</button>
               </div>
-              {!masLocal&&<>
-                {masDest?(
-                  <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:`${T.accent}0a`,borderRadius:10,border:`1.5px solid ${T.accent}20`,marginBottom:12}}>
-                    <MapPin size={14} color={T.accent}/>
-                    <span style={{flex:1,fontWeight:700}}>{masDest.c}</span>
-                    <button onClick={()=>setMasDest(null)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.muted}}><X size={12}/></button>
-                  </div>
-                ):(
-                  <div style={{marginBottom:12}}>
-                    <CitySearch placeholder="Buscar destino foráneo…" value={masSearch} onChange={setMasSearch} onSelect={t=>{setMasDest(t);setMasSearch("");}} vehiculo={masVeh}/>
-                  </div>
-                )}
-                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                  {VEHICULOS.map(v=>(
-                    <button key={v.k} onClick={()=>setMasVeh(v.k)} className="btn" style={{flex:1,minWidth:70,padding:"7px 4px",borderRadius:9,border:`2px solid ${masVeh===v.k?T.accent:T.border2}`,background:masVeh===v.k?`${T.accent}0d`:"transparent",cursor:"pointer",fontSize:11,fontWeight:masVeh===v.k?700:500,color:masVeh===v.k?T.accent:T.muted,textAlign:"center"}}>{v.icon}<br/>{v.label.split(" ")[0]}</button>
+              {!mLocal&&<>
+                {mDest
+                  ?<div style={{display:"flex",alignItems:"center",gap:9,padding:"9px 13px",background:A+"08",borderRadius:10,border:"1.5px solid "+A+"20",marginBottom:11}}>
+                      <MapPin size={13} color={A}/><span style={{flex:1,fontWeight:700,fontSize:13}}>{mDest.c}</span>
+                      <button onClick={()=>setMDest(null)} className="btn" style={{color:MUTED}}><X size={11}/></button>
+                    </div>
+                  :<div style={{marginBottom:11}}><CitySearch value={mSearch} onChange={setMSearch} onSelect={t=>{setMDest(t);setMSearch("");}} veh={mVeh}/></div>
+                }
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:11}}>
+                  {VEHK.map(v=>(
+                    <button key={v.k} onClick={()=>setMVeh(v.k)} className="btn" style={{flex:1,minWidth:70,padding:"7px 4px",borderRadius:9,border:"2px solid "+(mVeh===v.k?A:BORDER2),background:mVeh===v.k?A+"08":"#fff",cursor:"pointer",fontSize:11,fontWeight:mVeh===v.k?700:500,color:mVeh===v.k?A:MUTED,textAlign:"center"}}>
+                      {v.icon}<br/>{v.label.split(" ")[0]}
+                    </button>
                   ))}
                 </div>
               </>}
-            </div>
-
-            <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-              <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Viáticos del personal</div>
-              <div style={{display:"grid",gridTemplateColumns:masLocal?"1fr":"1fr 1fr",gap:12,marginBottom:12}}>
+              <div style={{display:"grid",gridTemplateColumns:mLocal?"1fr":"1fr 1fr",gap:11}}>
                 <div>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comida/persona/día</div>
-                  <input type="number" value={masComida} onChange={e=>setMasComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                  <div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Comida/persona/día</div>
+                  <input type="number" value={mComida} onChange={e=>setMComida(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
                 </div>
-                {!masLocal&&<div>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel/persona/noche</div>
-                  <input type="number" value={masHotel} onChange={e=>setMasHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                {!mLocal&&<div>
+                  <div style={{fontSize:10,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Hotel/persona/noche</div>
+                  <input type="number" value={mHotel} onChange={e=>setMHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
                 </div>}
               </div>
-              {(masXComida>0||masXHotel>0)&&(
-                <div style={{padding:"10px 14px",background:`${T.blue}0a`,borderRadius:10,border:`1px solid ${T.blue}20`}}>
-                  <div style={{fontSize:11,color:T.blue,fontWeight:600}}>{masTotalPersonas} personas × {masDias} días × ${masComida}{!masLocal?` + ${masNoches} noches × $${masHotel}`:""}</div>
-                  <div style={{fontFamily:T.mono,fontSize:14,fontWeight:700,color:T.blue,marginTop:4}}>Viáticos: {fmt(masXViatic)}</div>
-                </div>
-              )}
             </div>
           </>}
 
-          {/* NOTAS */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <Textarea label="Notas / Condiciones especiales" value={notas} onChange={e=>setNotas(e.target.value)} placeholder="Condiciones de carga, tipo de mercancía, instrucciones especiales…"/>
-          </div>
+          <Txt label="Notas / Condiciones especiales" value={notas} onChange={e=>setNotas(e.target.value)} placeholder="Tipo de mercancía, instrucciones especiales…"/>
 
-          {/* CTA BUTTON */}
-          <button onClick={()=>{if(canQ)setStep("preview");}} className="btn" style={{padding:"15px 20px",borderRadius:14,border:"none",cursor:canQ?"pointer":"not-allowed",background:canQ?`linear-gradient(135deg,${T.accent},#fb923c)`:"#e2e8f4",color:canQ?"#fff":T.muted,fontFamily:T.display,fontWeight:700,fontSize:17,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:canQ?`0 6px 28px ${T.accent}40`:"none",transition:"all .2s"}}>
-            <DollarSign size={20}/>
-            {canQ?`Generar cotización ${modo==="foraneo"?`→ ${forDest?.c}`:modo==="local"?"local":"masiva"}`:"Completa los campos requeridos"}
+          <button onClick={()=>{if(canQ)setStep("preview");}} className="btn" style={{padding:"14px 20px",borderRadius:13,background:canQ?"linear-gradient(135deg,"+A+",#fb923c)":"#e8eef6",color:canQ?"#fff":MUTED,fontFamily:DISPLAY,fontWeight:700,fontSize:17,display:"flex",alignItems:"center",justifyContent:"center",gap:9,boxShadow:canQ?"0 6px 24px "+A+"38":"none",cursor:canQ?"pointer":"not-allowed",transition:"all .15s"}}>
+            <DollarSign size={19}/>{canQ?"Generar cotización":"Completa los campos requeridos"}
           </button>
         </div>
 
-        {/* ── RIGHT COLUMN: LIVE PREVIEW ── */}
-        <div style={{position:"sticky",top:0,paddingTop:4}}>
-          <div style={{background:"#ffffff",border:`1.5px solid ${T.border}`,borderRadius:18,overflow:"hidden",marginBottom:14,boxShadow:"0 4px 24px rgba(12,24,41,.06)"}}>
-            <div style={{background:"#ffffff",padding:"20px 22px 16px",borderBottom:`2px solid ${T.accent}`,position:"relative"}}>
-              <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${T.accent},#fb923c)`}}/>
-              <div style={{fontFamily:T.mono,fontSize:10,color:T.accent,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8,marginTop:4}}>● Cotización en vivo</div>
-              <div style={{fontFamily:T.mono,fontWeight:700,fontSize:36,color:T.text,letterSpacing:"-0.03em",lineHeight:1}}>{fmt(total)}</div>
-              <div style={{fontSize:11,color:T.muted,marginTop:5,fontWeight:500}}>MXN con IVA incluido</div>
+        {/* ── RIGHT: PREVIEW EN VIVO ── */}
+        <div style={{position:"sticky",top:78,display:"flex",flexDirection:"column",gap:13}}>
+          <div style={{background:"#ffffff",border:"1.5px solid "+BORDER,borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(12,24,41,.07)"}}>
+            <div style={{borderTop:"3px solid "+A,padding:"18px 20px 14px",borderBottom:"1px solid "+BORDER}}>
+              <div style={{fontFamily:MONO,fontSize:9,color:A,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}>● COTIZACIÓN EN VIVO</div>
+              <div style={{fontFamily:MONO,fontWeight:700,fontSize:38,color:TEXT,letterSpacing:"-0.03em",lineHeight:1}}>{fmt(total)}</div>
+              <div style={{fontSize:11,color:MUTED,marginTop:5,fontWeight:500}}>MXN con IVA incluido · {modo==="foraneo"?(fDest?.c||"Sin destino"):modo==="local"?"CDMX":"Masivo"}</div>
             </div>
-            <div style={{padding:"16px 20px"}}>
+            <div style={{padding:"14px 18px"}}>
               {modo==="foraneo"&&<>
-                <Row l={`Base · ${forDest?.c||"Sin destino"}`} v={fmt(forBase)}/>
-                {forUrgente&&<Row l="⚡ Urgente +35%" v={`+${fmt(forXUrg)}`} c={T.rose}/>}
-                {forManiobra&&<Row l={`💪 Ayudantes (${forNumAyud})`} v={`+${fmt(forXMan)}`} c={T.violet}/>}
-                {forParadas>0&&<Row l={`📦 Paradas (${forParadas})`} v={`+${fmt(forXPar)}`} c={T.blue}/>}
-                {forResguardo&&<Row l="🛡️ Resguardo" v={`+${fmt(forXRes)}`} c={T.green}/>}
-                {forXComida>0&&<Row l={`🍽️ Comidas`} v={`+${fmt(forXComida)}`} c={T.amber}/>}
-                {forXHotel>0&&<Row l={`🏨 Hotel`} v={`+${fmt(forXHotel)}`} c={T.blue}/>}
-                <Row l="Subtotal" v={fmt(forSub)}/>
-                <Row l="IVA 16%" v={fmt(forIva)} c={T.muted}/>
-                <Row l="TOTAL" v={fmt(forTotal)} c={T.accent} bold/>
-                {forDest&&<div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.border}`}}>
-                  <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase",marginBottom:8}}>Comparar vehículos</div>
-                  {VEHICULOS.map(v=>(
-                    <button key={v.k} onClick={()=>setForVeh(v.k)} className="btn" style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",marginBottom:2,borderRadius:8,border:"none",cursor:"pointer",background:forVeh===v.k?`${T.accent}12`:"transparent"}}>
-                      <span style={{fontSize:11,color:forVeh===v.k?T.text:T.muted}}>{v.icon} {v.label}</span>
-                      <span style={{fontFamily:T.mono,fontSize:11,fontWeight:700,color:forVeh===v.k?T.accent:T.muted}}>{fmt(forDest[v.k])}</span>
+                <Row l={"Base · "+(fDest?.c||"Sin destino")} v={fmt(fBase)}/>
+                {fUrg&&<Row l="⚡ Urgente +35%" v={"+"+fmt(fXU)} c={ROSE}/>}
+                {fMani&&<Row l={"💪 Ayudantes ("+fNumAyud+")"} v={"+"+fmt(fXM)} c={VIOLET}/>}
+                {fParadas>0&&<Row l={"📦 Paradas ("+fParadas+")"} v={"+"+fmt(fXP)} c={BLUE}/>}
+                {fRes&&<Row l="🛡️ Resguardo" v={"+"+fmt(fXR)} c={GREEN}/>}
+                {fXC>0&&<Row l="🍽️ Comidas" v={"+"+fmt(fXC)} c={AMBER}/>}
+                {fXH>0&&<Row l="🏨 Hotel" v={"+"+fmt(fXH)} c={BLUE}/>}
+                <Row l="Subtotal" v={fmt(fSub)}/>
+                <Row l="IVA 16%" v={fmt(fIva)} c={MUTED}/>
+                <Row l="TOTAL" v={fmt(fTot)} c={A} bold/>
+                {fDest&&<div style={{marginTop:11,paddingTop:11,borderTop:"1px solid "+BORDER}}>
+                  <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:7}}>Comparar vehículos</div>
+                  {VEHK.map(v=>(
+                    <button key={v.k} onClick={()=>setFVeh(v.k)} className="btn fr" style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 7px",marginBottom:2,borderRadius:7,background:fVeh===v.k?A+"0e":"transparent"}}>
+                      <span style={{fontSize:11,color:fVeh===v.k?TEXT:MUTED}}>{v.icon} {v.label}</span>
+                      <span style={{fontFamily:MONO,fontSize:11,fontWeight:700,color:fVeh===v.k?A:MUTED}}>{fmt(fDest[v.k])}</span>
                     </button>
                   ))}
                 </div>}
               </>}
               {modo==="local"&&<>
-                <Row l={`${VEHICULOS.find(v=>v.k===locVeh)?.label}`} v={fmt(locBase)}/>
-                {locParadas>0&&<Row l={`Paradas (${locParadas})`} v={`+${fmt(locXPar)}`} c={T.blue}/>}
-                {locResguardo&&<Row l="🛡️ Resguardo" v={`+${fmt(locXRes)}`} c={T.green}/>}
-                <Row l="Subtotal" v={fmt(locSub)}/>
-                <Row l="IVA 16%" v={fmt(locIva)} c={T.muted}/>
-                <Row l="TOTAL" v={fmt(locTotal)} c={T.accent} bold/>
+                <Row l={VEHK.find(v=>v.k===lVeh)?.label+" · "+(lUrg?"Urgente":"Normal")+(lAyud?" + Ayud.":"")} v={fmt(lBase)}/>
+                {lParadas>0&&<Row l={"📦 Paradas ("+lParadas+")"} v={"+"+fmt(lXP)} c={BLUE}/>}
+                {lRes&&<Row l="🛡️ Resguardo" v={"+"+fmt(lXR)} c={GREEN}/>}
+                <Row l="Subtotal" v={fmt(lSub)}/>
+                <Row l="IVA 16%" v={fmt(lIva)} c={MUTED}/>
+                <Row l="TOTAL" v={fmt(lTot)} c={A} bold/>
               </>}
               {modo==="masivo"&&<>
-                <Row l={`${camionetas} camioneta${camionetas>1?"s":""} × ${masDias} días`} v={fmt(masBase||0)}/>
-                {masUrgente&&<Row l="⚡ Urgente +35%" v={`+${fmt(masXUrg)}`} c={T.rose}/>}
-                {masXComida>0&&<Row l="🍽️ Comidas personal" v={`+${fmt(masXComida)}`} c={T.amber}/>}
-                {masXHotel>0&&<Row l="🏨 Hospedaje" v={`+${fmt(masXHotel)}`} c={T.blue}/>}
-                <Row l="Subtotal" v={fmt(masSub)}/>
-                <Row l="IVA 16%" v={fmt(masIva)} c={T.muted}/>
-                <Row l="TOTAL" v={fmt(masTotal)} c={T.accent} bold/>
-                {masDias<=plazo?(
-                  <div style={{marginTop:10,padding:"8px 12px",background:T.greenDim,borderRadius:8,border:`1px solid ${T.green}28`,fontSize:11,color:T.green}}>✓ Listo en {masDias} días ({plazo-masDias} días de holgura)</div>
-                ):(
-                  <div style={{marginTop:10,padding:"8px 12px",background:T.amberDim,borderRadius:8,border:`1px solid ${T.amber}28`,fontSize:11,color:T.amber}}>⚠️ Necesitas más camionetas o ampliar el plazo</div>
-                )}
+                {mBase>0&&<Row l={vans+" vans × tarifa"} v={fmt(mBase)}/>}
+                {mUrg&&<Row l="⚡ Urgente +35%" v={"+"+fmt(mXU)} c={ROSE}/>}
+                {mXC>0&&<Row l="🍽️ Comidas personal" v={"+"+fmt(mXC)} c={AMBER}/>}
+                {mXH>0&&<Row l="🏨 Hospedaje" v={"+"+fmt(mXH)} c={BLUE}/>}
+                <Row l="Subtotal" v={fmt(mSub)}/>
+                <Row l="IVA 16%" v={fmt(mIva)} c={MUTED}/>
+                <Row l="TOTAL" v={fmt(mTot)} c={A} bold/>
+                {mDias<=plazo
+                  ?<div style={{marginTop:9,padding:"7px 11px",background:GREEN+"0e",borderRadius:8,border:"1px solid "+GREEN+"24",fontSize:11,color:GREEN}}>✓ Listo en {mDias} días ({plazo-mDias} días de holgura)</div>
+                  :<div style={{marginTop:9,padding:"7px 11px",background:AMBER+"0e",borderRadius:8,border:"1px solid "+AMBER+"24",fontSize:11,color:AMBER}}>⚠️ Necesitas más vans o ampliar el plazo</div>
+                }
               </>}
             </div>
           </div>
 
           {step==="preview"&&(
-            <div style={{background:"#ffffff",border:`1.5px solid ${T.accent}28`,borderRadius:16,padding:18,display:"flex",flexDirection:"column",gap:10}}>
-              <div style={{fontSize:12,fontWeight:700,color:T.accent,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:4}}>Cotización lista</div>
-              <button onClick={handleSave} disabled={saving} className="btn" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:11,padding:"11px 0",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 4px 20px ${T.accent}30`,opacity:saving?.7:1}}>
-                {saving?<><div style={{width:14,height:14,border:"2px solid #fff",borderTop:"2px solid transparent",borderRadius:"50%"}} className="spin"/>Guardando…</> : <><Send size={15}/>Guardar en Firebase</>}
+            <div style={{background:"#ffffff",border:"1.5px solid "+A+"28",borderRadius:14,padding:16,display:"flex",flexDirection:"column",gap:9}}>
+              <div style={{fontSize:11,fontWeight:800,color:A,textTransform:"uppercase",letterSpacing:"0.07em"}}>Cotización lista ✓</div>
+              <button onClick={handleSave} disabled={saving} className="btn" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:10,padding:"11px 0",fontFamily:SANS,fontWeight:700,fontSize:14,boxShadow:"0 4px 16px "+A+"30",opacity:saving?.7:1}}>
+                {saving?<><div style={{width:13,height:13,border:"2px solid #fff",borderTop:"2px solid transparent",borderRadius:"50%"}} className="spin"/>Guardando…</>:<><Send size={14}/>Guardar en Firebase</>}
               </button>
-              <button onClick={handlePDF} className="btn" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"transparent",color:T.text,border:`1.5px solid ${T.border2}`,borderRadius:11,padding:"11px 0",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14}}>
-                <Printer size={15}/>Exportar PDF
+              <button onClick={()=>printPDF(buildQ())} className="btn" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,border:"1.5px solid "+BORDER2,borderRadius:10,padding:"11px 0",fontFamily:SANS,fontWeight:700,fontSize:14,color:TEXT}}>
+                <Printer size={14}/>Exportar PDF
               </button>
-              {forDest&&modo==="foraneo"&&(
-                <a href={buildMapsURL(["Ciudad de México",forDest.c])} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:T.blueDim,color:T.blue,border:`1.5px solid ${T.blue}28`,borderRadius:11,padding:"11px 0",textDecoration:"none",fontFamily:T.sans,fontWeight:700,fontSize:14}}>
-                  <Globe size={15}/>Abrir en Google Maps
+              {fDest&&modo==="foraneo"&&(
+                <a href={mapsURL(["Ciudad de México",fDest.c])} target="_blank" rel="noopener noreferrer"
+                  style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:BLUE+"0e",border:"1.5px solid "+BLUE+"28",borderRadius:10,padding:"11px 0",textDecoration:"none",fontFamily:SANS,fontWeight:700,fontSize:14,color:BLUE}}>
+                  <Globe size={14}/>Abrir en Google Maps
                 </a>
               )}
             </div>
           )}
         </div>
       </div>
-      </div>
     </div>
   );
 }
 
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   PLANIFICADOR DE RUTAS — FLAGSHIP FEATURE
-═══════════════════════════════════════════════════════════════════════════ */
-function PlanificadorRutas({onSaved}){
+/* ─── PLANIFICADOR RUTAS ─────────────────────────────────────────────────── */
+function PlanificadorRutas(){
   const [nombre,setNombre]=useState("");
   const [cliente,setCliente]=useState("");
-  const [vehiculo,setVehiculo]=useState("cam");
-  const [stops,setStops]=useState([{id:uid(),city:"Ciudad de México",pdv:0,addr:"",km:0,base:0,isOrigin:true}]);
+  const [veh,setVeh]=useState("cam");
+  const [stops,setStops]=useState([{id:uid(),city:"Ciudad de México",pdv:0,km:0,base:0,isOrigin:true}]);
   const [search,setSearch]=useState("");
   const [maxDia,setMaxDia]=useState(20);
   const [plazo,setPlazo]=useState(5);
-  const [comida,setComida]=useState(COMIDA_DEF);
-  const [hotel,setHotel]=useState(HOTEL_DEF);
-  const [personasVan,setPersonasVan]=useState(1);
-  const [ayudante,setAyudante]=useState(false);
-  const [urgente,setUrgente]=useState(false);
+  const [comida,setComida]=useState(COMIDA);
+  const [hotel,setHotel]=useState(HOTEL);
+  const [pVan,setPVan]=useState(1);
+  const [ayud,setAyud]=useState(false);
+  const [urg,setUrg]=useState(false);
   const [rutas,setRutas]=useState([]);
-  const [loadingRutas,setLoadingRutas]=useState(true);
+  const [loadR,setLoadR]=useState(true);
   const [saving,setSaving]=useState(false);
   const [toast,setToast]=useState(null);
-  const [viewRuta,setViewRuta]=useState(null);
-  const showToast=(m,t="ok")=>{setToast({msg:m,type:t});};
+  const [viewR,setViewR]=useState(null);
+  const showT=(m,t="ok")=>setToast({msg:m,type:t});
 
   useEffect(()=>{
-    const u=onSnapshot(collection(db,"rutas"),s=>{
+    return onSnapshot(collection(db,"rutas"),s=>{
       setRutas(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));
-      setLoadingRutas(false);
+      setLoadR(false);
     });
-    return u;
   },[]);
 
-  /* ── CALCULATIONS ── */
   const totalPDV=useMemo(()=>stops.filter(s=>!s.isOrigin).reduce((a,s)=>a+(s.pdv||0),0),[stops]);
   const totalKm=useMemo(()=>{
     let km=0;
-    for(let i=1;i<stops.length;i++){
-      const a=stops[i-1].km||0;
-      const b=stops[i].km||0;
-      // Approximate inter-city distance using triangle inequality from CDMX
-      km+=Math.abs(b-a)*0.8+Math.min(a,b)*0.2;
-    }
+    for(let i=1;i<stops.length;i++) km+=Math.abs((stops[i].km||0)-(stops[i-1].km||0))*.8+Math.min(stops[i-1].km||0,stops[i].km||0)*.2;
     return Math.round(km);
   },[stops]);
 
-  const {camionetas,dias:diasOp,capDia}=useMemo(()=>totalPDV>0?calcFlota(totalPDV,maxDia,plazo):{camionetas:1,dias:0,capDia:maxDia},[totalPDV,maxDia,plazo]);
-  const vehD=VEHICULOS.find(v=>v.k===vehiculo);
-  const crew=camionetas*((vehD?.crew||1)+personasVan-1+(ayudante?1:0));
-  const {xComida,xHotel,total:xViatic,dias:diasFuera,noches}=useMemo(()=>calcViaticos(totalKm,crew,comida,hotel),[totalKm,crew,comida,hotel]);
-  const tarifaTransp=useMemo(()=>stops.filter(s=>!s.isOrigin).reduce((a,s)=>a+(s.base||0),0)*camionetas,[stops,camionetas]);
-  const xUrg=urgente?tarifaTransp*.35:0;
-  const subtotal=tarifaTransp+xUrg+xViatic;
-  const iva=subtotal*.16;
-  const total=subtotal+iva;
+  const {vans,dias:diasOp,capDia}=useMemo(()=>totalPDV>0?calcFlota(totalPDV,maxDia,plazo):{vans:1,dias:0,capDia:maxDia},[totalPDV,maxDia,plazo]);
+  const vehD=VEHK.find(v=>v.k===veh);
+  const crew=vans*((vehD?.crew||1)+pVan-1+(ayud?1:0));
+  const {xC,xH,total:xViat,dias:diasF,noches}=useMemo(()=>calcViaticos(totalKm,crew,comida,hotel),[totalKm,crew,comida,hotel]);
+  const tarifaT=useMemo(()=>stops.filter(s=>!s.isOrigin).reduce((a,s)=>a+(s.base||0),0)*vans,[stops,vans]);
+  const xU=urg?tarifaT*.35:0;
+  const sub=tarifaT+xU+xViat;
+  const iva=sub*.16;
+  const total=sub+iva;
+  const mapU=useMemo(()=>mapsURL(stops.map(s=>s.city)),[stops]);
 
-  const mapsURL=useMemo(()=>buildMapsURL(stops.map(s=>s.city)),[stops]);
-
-  /* ── STOP MANAGEMENT ── */
-  const addStop=(tarifa)=>{
-    setStops(prev=>[...prev,{id:uid(),city:tarifa.c,pdv:0,addr:"",km:tarifa.km,base:tarifa[vehiculo],isOrigin:false}]);
+  const addStop=t=>{
+    setStops(p=>[...p,{id:uid(),city:t.c,pdv:0,km:t.km,base:t[veh],isOrigin:false}]);
     setSearch("");
   };
-  const removeStop=(id)=>setStops(prev=>prev.filter(s=>s.id!==id||s.isOrigin));
-  const updateStop=(id,key,val)=>setStops(prev=>prev.map(s=>s.id===id?{...s,[key]:val,base:key==="city"?val:s.base}:s));
-  const moveUp=(idx)=>{
-    if(idx<=1)return;
-    setStops(prev=>{const a=[...prev];[a[idx-1],a[idx]]=[a[idx],a[idx-1]];return a;});
-  };
-  const moveDown=(idx)=>{
-    if(idx>=stops.length-1)return;
-    setStops(prev=>{const a=[...prev];[a[idx],a[idx+1]]=[a[idx+1],a[idx]];return a;});
-  };
+  const rmStop=id=>setStops(p=>p.filter(s=>s.id!==id||s.isOrigin));
+  const updStop=(id,k,v)=>setStops(p=>p.map(s=>s.id===id?{...s,[k]:v}:s));
+  const mvUp=i=>{if(i<=1)return;setStops(p=>{const a=[...p];[a[i-1],a[i]]=[a[i],a[i-1]];return a;});};
+  const mvDn=i=>{if(i>=stops.length-1)return;setStops(p=>{const a=[...p];[a[i],a[i+1]]=[a[i+1],a[i]];return a;});};
 
-  // Update base prices when vehicle changes
   useEffect(()=>{
-    setStops(prev=>prev.map(s=>{
-      if(s.isOrigin)return s;
-      const t=TARIFA.find(t=>t.c===s.city);
-      return t?{...s,base:t[vehiculo]}:s;
+    setStops(p=>p.map(s=>{
+      if(s.isOrigin) return s;
+      const t=TAR.find(t=>t.c===s.city);
+      return t?{...s,base:t[veh]}:s;
     }));
-  },[vehiculo]);
+  },[veh]);
 
   const handleSave=async()=>{
-    if(!nombre.trim()||stops.length<2){showToast("Agrega nombre y al menos un destino","err");return;}
+    if(!nombre.trim()||stops.length<2){showT("Agrega nombre y al menos un destino","err");return;}
     setSaving(true);
     try{
-      const data={
-        nombre,cliente,vehiculo,vehiculoLabel:vehD?.label,
-        stops:stops.map(s=>({city:s.city,pdv:s.pdv||0,km:s.km||0})),
-        totalPDV,totalKm,camionetas,diasOp,capDia,crew,
-        xViatic,tarifaTransp,subtotal,iva,total,plazo,maxDia,
-        mapsURL,status:"Programada",progreso:0,
-        createdAt:serverTimestamp(),
-      };
-      await addDoc(collection(db,"rutas"),data);
-      showToast("✓ Ruta guardada en Firebase");
-      onSaved&&onSaved();
-    }catch(e){showToast(e.message,"err");}
+      await addDoc(collection(db,"rutas"),{nombre,cliente,veh,vehiculoLabel:vehD?.label,stops:stops.map(s=>({city:s.city,pdv:s.pdv||0,km:s.km||0})),totalPDV,totalKm,vans,diasOp,capDia,crew,xViat,tarifaT,sub,iva,total,plazo,maxDia,mapURL:mapU,status:"Programada",progreso:0,createdAt:serverTimestamp()});
+      showT("✓ Ruta guardada");
+    }catch(e){showT(e.message,"err");}
     setSaving(false);
   };
 
-  const handlePDF=()=>{
-    const q={
-      folio:"RUT-"+Date.now().toString(36).slice(-6).toUpperCase(),
-      cliente,modo:"ruta",
-      destino:stops.filter(s=>!s.isOrigin).map(s=>s.city).join(" → "),
-      vehiculoLabel:vehD?.label,
-      stops:stops.map(s=>({city:s.city,pdv:s.pdv})),
-      lines:[
-        {label:`Tarifa transporte (${stops.filter(s=>!s.isOrigin).length} destinos × ${camionetas} vans)`,value:fmt(tarifaTransp)},
-        urgente&&{label:"⚡ Urgente +35%",value:`+${fmt(xUrg)}`,color:T.rose},
-        xComida>0&&{label:`🍽️ Comidas · ${crew}p × ${diasFuera}d`,value:`+${fmt(xComida)}`,color:T.amber},
-        xHotel>0&&{label:`🏨 Hotel · ${crew}p × ${noches}n`,value:`+${fmt(xHotel)}`,color:T.blue},
-        {label:"Subtotal sin IVA",value:fmt(subtotal)},
-        {label:"IVA 16%",value:fmt(iva),color:T.muted},
-        {label:"TOTAL CON IVA",value:fmt(total),bold:true,color:T.accent},
-      ].filter(Boolean),
-      flota:{camionetas,dias:diasOp,capDia},
-      totalPDV,plazo,total,
-    };
-    generateQuotePDF(q);
-  };
-
-  const statusColor={Programada:T.violet,"En curso":T.blue,Completada:T.green,Cancelada:T.rose};
+  const sc={Programada:VIOLET,"En curso":BLUE,Completada:GREEN,Cancelada:ROSE};
 
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
+    <div style={{flex:1,overflowY:"auto",padding:"28px 32px",background:"#f1f4fb"}}>
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
-
-      <div className="au" style={{marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div>
-          <h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Planificador de Rutas</h1>
-          <p style={{color:T.muted,fontSize:13,marginTop:4}}>Multi-parada · Asignación automática de flota · Google Maps integrado</p>
-        </div>
+      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22}}>
+        <div><h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:28,color:TEXT,letterSpacing:"-0.03em"}}>Planificador de Rutas</h1><p style={{color:MUTED,fontSize:13,marginTop:3}}>Multi-parada · Flota automática · Google Maps</p></div>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"1fr 360px",gap:18,alignItems:"start"}}>
-        {/* ── BUILDER ── */}
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 350px",gap:16,alignItems:"start"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:13}}>
 
-          {/* RUTA INFO */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Datos de la ruta</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <Input label="Nombre de ruta *" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: MTY Noreste Semana 12"/>
-              <Input label="Cliente" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Nombre del cliente"/>
+          <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,padding:20}}>
+            <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Datos de la ruta</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}>
+              <Inp label="Nombre de ruta *" value={nombre} onChange={e=>setNombre(e.target.value)} placeholder="Ej: MTY Noreste S12"/>
+              <Inp label="Cliente" value={cliente} onChange={e=>setCliente(e.target.value)} placeholder="Nombre del cliente"/>
             </div>
           </div>
 
-          {/* STOP LIST */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
-            <div style={{padding:"16px 22px",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text}}>Paradas de la ruta ({stops.length})</span>
-              <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                <Tag color={T.violet}>{stops.filter(s=>!s.isOrigin).length} destinos</Tag>
-                <Tag color={T.accent}>{totalPDV.toLocaleString()} PDVs</Tag>
-              </div>
+          <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,overflow:"hidden"}}>
+            <div style={{padding:"14px 20px",borderBottom:"1px solid "+BORDER,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:14}}>Paradas ({stops.length})</span>
+              <div style={{display:"flex",gap:7}}><Tag color={VIOLET}>{stops.filter(s=>!s.isOrigin).length} destinos</Tag><Tag color={A}>{totalPDV.toLocaleString()} PDVs</Tag></div>
             </div>
-
-            <div style={{padding:16,display:"flex",flexDirection:"column",gap:8}}>
-              {stops.map((stop,idx)=>(
-                <div key={stop.id} className="si" style={{display:"flex",alignItems:"flex-start",gap:10,background:stop.isOrigin?"#f8fafd":T.card,border:`1.5px solid ${stop.isOrigin?T.border2:T.accent+"28"}`,borderRadius:12,padding:"12px 14px",transition:"all .15s"}}>
-                  {/* LINE INDICATOR */}
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",paddingTop:6,gap:0}}>
-                    <div style={{width:12,height:12,borderRadius:"50%",background:stop.isOrigin?T.blue:T.accent,border:`2px solid ${stop.isOrigin?T.blue:T.accent}`,flexShrink:0}}/>
-                    {idx<stops.length-1&&<div style={{width:2,height:20,background:`${T.border2}`,marginTop:4}}/>}
+            <div style={{padding:14,display:"flex",flexDirection:"column",gap:8}}>
+              {stops.map((s,i)=>(
+                <div key={s.id} style={{display:"flex",alignItems:"flex-start",gap:9,background:s.isOrigin?"#f8fafd":"#fff",border:"1.5px solid "+(s.isOrigin?BORDER2:A+"24"),borderRadius:11,padding:"11px 13px",transition:"all .13s"}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",paddingTop:5}}>
+                    <div style={{width:11,height:11,borderRadius:"50%",background:s.isOrigin?BLUE:A,flexShrink:0}}/>
+                    {i<stops.length-1&&<div style={{width:2,height:18,background:BORDER2,marginTop:3}}/>}
                   </div>
-
                   <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:stop.isOrigin?0:8}}>
-                      <span style={{fontFamily:T.sans,fontWeight:700,fontSize:14,color:T.text}}>{stop.city}</span>
-                      {stop.isOrigin&&<Tag color={T.blue} sm>ORIGEN</Tag>}
-                      {!stop.isOrigin&&stop.km>0&&<span style={{fontFamily:T.mono,fontSize:10,color:T.muted}}>{stop.km.toLocaleString()} km</span>}
+                    <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:s.isOrigin?0:8}}>
+                      <span style={{fontWeight:700,fontSize:14,color:TEXT}}>{s.city}</span>
+                      {s.isOrigin&&<Tag color={BLUE} sm>ORIGEN</Tag>}
+                      {!s.isOrigin&&s.km>0&&<span style={{fontFamily:MONO,fontSize:10,color:MUTED}}>{s.km.toLocaleString()} km</span>}
                     </div>
-                    {!stop.isOrigin&&(
+                    {!s.isOrigin&&(
                       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                         <div>
-                          <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>PDVs en esta parada</div>
-                          <input type="number" value={stop.pdv||""} onChange={e=>updateStop(stop.id,"pdv",parseInt(e.target.value)||0)}
-                            placeholder="0" style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.accent,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                          <div style={{fontSize:9,fontWeight:700,color:MUTED,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.05em"}}>PDVs en esta parada</div>
+                          <input type="number" value={s.pdv||""} onChange={e=>updStop(s.id,"pdv",parseInt(e.target.value)||0)} placeholder="0"
+                            style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:8,padding:"7px 10px",fontFamily:MONO,fontSize:15,fontWeight:700,color:A}}/>
                         </div>
                         <div>
-                          <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.04em"}}>Dirección / Zona</div>
-                          <input type="text" value={stop.addr||""} onChange={e=>updateStop(stop.id,"addr",e.target.value)}
-                            placeholder="Opcional…" style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:8,padding:"7px 10px",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none"}}/>
+                          <div style={{fontSize:9,fontWeight:700,color:MUTED,marginBottom:4,textTransform:"uppercase",letterSpacing:"0.05em"}}>Zona / Referencia</div>
+                          <input type="text" value={s.addr||""} onChange={e=>updStop(s.id,"addr",e.target.value)} placeholder="Opcional"
+                            style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:8,padding:"7px 10px",fontSize:13}}/>
                         </div>
                       </div>
                     )}
                   </div>
-
-                  {!stop.isOrigin&&(
-                    <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                      <button onClick={()=>moveUp(idx)} className="btn" style={{border:`1px solid ${T.border2}`,background:"transparent",cursor:"pointer",borderRadius:6,padding:"3px 6px",color:T.muted}}><ChevronUp size={11}/></button>
-                      <button onClick={()=>moveDown(idx)} className="btn" style={{border:`1px solid ${T.border2}`,background:"transparent",cursor:"pointer",borderRadius:6,padding:"3px 6px",color:T.muted}}><ChevronDown size={11}/></button>
-                      <button onClick={()=>removeStop(stop.id)} className="btn" style={{border:`1px solid ${T.roseDim}`,background:T.roseDim,cursor:"pointer",borderRadius:6,padding:"3px 6px",color:T.rose}}><X size={11}/></button>
+                  {!s.isOrigin&&(
+                    <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                      <button onClick={()=>mvUp(i)} className="btn" style={{border:"1px solid "+BORDER2,borderRadius:6,padding:"3px 5px",color:MUTED}}><ChevronUp size={10}/></button>
+                      <button onClick={()=>mvDn(i)} className="btn" style={{border:"1px solid "+BORDER2,borderRadius:6,padding:"3px 5px",color:MUTED}}><ChevronDown size={10}/></button>
+                      <button onClick={()=>rmStop(s.id)} className="btn" style={{border:"1px solid "+ROSE+"28",background:ROSE+"08",borderRadius:6,padding:"3px 5px",color:ROSE}}><X size={10}/></button>
                     </div>
                   )}
                 </div>
               ))}
-
-              {/* ADD STOP */}
-              <div style={{padding:"12px 14px",background:`${T.accent}06`,border:`1.5px dashed ${T.accent}40`,borderRadius:12}}>
-                <div style={{fontSize:11,fontWeight:700,color:T.accent,marginBottom:8,letterSpacing:"0.04em"}}>+ AGREGAR PARADA</div>
-                <CitySearch
-                  placeholder={`Busca entre ${TARIFA.length} destinos…`}
-                  value={search} onChange={setSearch}
-                  onSelect={addStop}
-                  vehiculo={vehiculo}
-                  exclude={stops.map(s=>s.city)}
-                />
+              <div style={{padding:"11px 13px",background:A+"06",border:"1.5px dashed "+A+"38",borderRadius:11}}>
+                <div style={{fontSize:10,fontWeight:800,color:A,marginBottom:8,letterSpacing:"0.05em"}}>+ AGREGAR PARADA</div>
+                <CitySearch value={search} onChange={setSearch} onSelect={addStop} veh={veh} exclude={stops.map(s=>s.city)}/>
               </div>
             </div>
           </div>
 
-          {/* VEHICLE & FLEET CONFIG */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:14}}>Vehículo y flota</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-              {VEHICULOS.map(v=>(
-                <button key={v.k} onClick={()=>setVehiculo(v.k)} className="btn" style={{flex:1,minWidth:100,padding:"10px 8px",borderRadius:11,border:`2px solid ${vehiculo===v.k?T.accent:T.border2}`,background:vehiculo===v.k?`${T.accent}0d`:"transparent",cursor:"pointer",textAlign:"center",transition:"all .15s"}}>
-                  <div style={{fontSize:18,marginBottom:3}}>{v.icon}</div>
-                  <div style={{fontSize:12,fontWeight:700,color:vehiculo===v.k?T.accent:T.muted}}>{v.label}</div>
-                  <div style={{fontSize:10,color:T.muted}}>{v.cap}</div>
+          <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,padding:20}}>
+            <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Vehículo y flota</div>
+            <div style={{display:"flex",gap:7,flexWrap:"wrap",marginBottom:14}}>
+              {VEHK.map(v=>(
+                <button key={v.k} onClick={()=>setVeh(v.k)} className="btn" style={{flex:1,minWidth:90,padding:"9px 6px",borderRadius:10,border:"2px solid "+(veh===v.k?A:BORDER2),background:veh===v.k?A+"08":"#fff",cursor:"pointer",textAlign:"center"}}>
+                  <div style={{fontSize:17,marginBottom:2}}>{v.icon}</div>
+                  <div style={{fontSize:11,fontWeight:700,color:veh===v.k?A:MUTED}}>{v.label}</div>
                 </button>
               ))}
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:14}}>
-              <Stepper label="Entregas máx/día/van" value={maxDia} onChange={setMaxDia} min={1} max={300}/>
-              <Stepper label="Plazo máximo (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
-              <Stepper label="Personas por van" value={personasVan} onChange={setPersonasVan} min={1} max={5}/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:11,marginBottom:13}}>
+              <Spin label="Entregas máx/día/van" value={maxDia} onChange={setMaxDia} min={1} max={300}/>
+              <Spin label="Plazo máximo (días)" value={plazo} onChange={setPlazo} min={1} max={90}/>
+              <Spin label="Personas por van" value={pVan} onChange={setPVan} min={1} max={5}/>
             </div>
-            {totalPDV>0&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-              <InfoBox icon={Truck} color={T.accent} title="Camionetas" value={camionetas} sub={`calculado auto`} xs/>
-              <InfoBox icon={Calendar} color={T.blue} title="Días operación" value={diasOp} sub={`${capDia}/día`} xs/>
-              <InfoBox icon={Users} color={T.violet} title="Personal total" value={crew} sub="en campo" xs/>
+            {totalPDV>0&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:13}}>
+              <InfoBox icon={Truck} color={A} title="Vans necesarias" value={vans} sub={"para "+plazo+" días"}/>
+              <InfoBox icon={Calendar} color={BLUE} title="Días operación" value={diasOp} sub={capDia+"/día"}/>
+              <InfoBox icon={Users} color={VIOLET} title="Personal total" value={crew}/>
             </div>}
-            <div style={{display:"flex",gap:8}}>
-              <div style={{flex:1}}><Toggle checked={ayudante} onChange={setAyudante} label="💪 Ayudante por camioneta" sub="Personal adicional" accent={T.violet}/></div>
-              <div style={{flex:1}}><Toggle checked={urgente} onChange={setUrgente} label="⚡ Urgente (+35%)" sub="Sobre tarifa base" accent={T.rose}/></div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+              <Tog checked={ayud} onChange={setAyud} label="💪 Ayudante/van" color={VIOLET}/>
+              <Tog checked={urg} onChange={setUrg} label="⚡ Urgente +35%" color={ROSE}/>
             </div>
           </div>
 
-          {/* VIÁTICOS */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-              <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Viáticos del personal</div>
-              {diasFuera>0&&<Tag color={T.blue}>{diasFuera} días fuera · {noches} noches</Tag>}
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
+          <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,padding:20}}>
+            <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:13}}>Viáticos del personal</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:diasF>0?11:0}}>
               <div>
-                <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Comida/persona/día</div>
-                <input type="number" value={comida} onChange={e=>setComida(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                <div style={{fontSize:9,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Comida/persona/día</div>
+                <input type="number" value={comida} onChange={e=>setComida(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
               </div>
               <div>
-                <div style={{fontSize:10,fontWeight:700,color:T.muted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.04em"}}>Hotel/persona/noche</div>
-                <input type="number" value={hotel} onChange={e=>setHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#ffffff",border:`1.5px solid ${T.border2}`,borderRadius:9,padding:"9px 12px",color:T.text,fontFamily:T.mono,fontSize:15,fontWeight:700,outline:"none"}}/>
+                <div style={{fontSize:9,fontWeight:700,color:MUTED,marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}}>Hotel/persona/noche</div>
+                <input type="number" value={hotel} onChange={e=>setHotel(Number(e.target.value)||0)} style={{width:"100%",background:"#fff",border:"1.5px solid "+BORDER2,borderRadius:9,padding:"9px 12px",fontFamily:MONO,fontSize:15,fontWeight:700}}/>
               </div>
             </div>
-            {xViatic>0&&<div style={{padding:"10px 14px",background:`${T.blue}0a`,borderRadius:10,border:`1px solid ${T.blue}20`}}>
-              <div style={{fontSize:11,color:T.blue,fontWeight:600}}>{crew} personas × {diasFuera} días × ${comida}/comida + {noches} noches × ${hotel}/hotel</div>
-              <div style={{fontFamily:T.mono,fontSize:15,fontWeight:700,color:T.blue,marginTop:4}}>Total viáticos: {fmt(xViatic)}</div>
+            {diasF>0&&<div style={{padding:"9px 12px",background:BLUE+"08",borderRadius:9,border:"1px solid "+BLUE+"18"}}>
+              <div style={{fontSize:11,color:BLUE,fontWeight:600}}>{crew}p × {diasF}d × ${comida}/comida{noches>0?" + "+noches+"n × $"+hotel+"/hotel":""}</div>
+              <div style={{fontFamily:MONO,fontSize:14,fontWeight:700,color:BLUE,marginTop:3}}>Total viáticos: {fmt(xViat)}</div>
             </div>}
           </div>
 
-          {/* ACTIONS */}
-          <div style={{display:"flex",gap:10}}>
-            <button onClick={handleSave} disabled={saving} className="btn" style={{flex:2,padding:"14px 0",borderRadius:13,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",fontFamily:T.display,fontWeight:700,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",gap:9,boxShadow:`0 6px 24px ${T.accent}38`,opacity:saving?.7:1}}>
-              {saving?<><div style={{width:16,height:16,border:"2px solid #fff",borderTop:"2px solid transparent",borderRadius:"50%"}} className="spin"/>Guardando…</>:<><Route size={18}/>Guardar Ruta</>}
+          <div style={{display:"flex",gap:9}}>
+            <button onClick={handleSave} disabled={saving} className="btn" style={{flex:2,padding:"13px 0",borderRadius:12,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",fontFamily:DISPLAY,fontWeight:700,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 5px 20px "+A+"35",opacity:saving?.7:1}}>
+              {saving?<><div style={{width:15,height:15,border:"2px solid #fff",borderTop:"2px solid transparent",borderRadius:"50%"}} className="spin"/>Guardando…</>:<><Route size={17}/>Guardar Ruta</>}
             </button>
-            <button onClick={handlePDF} className="btn" style={{flex:1,padding:"14px 0",borderRadius:13,border:`1.5px solid ${T.border2}`,background:T.card,cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:T.text}}>
-              <Printer size={15}/>PDF
+            <button onClick={()=>{const q={folio:"RUT-"+uid(),cliente,modo:"ruta",modoLabel:"RUTA MULTI-PARADA",destino:stops.filter(s=>!s.isOrigin).map(s=>s.city).join(" → "),vehiculoLabel:vehD?.label,stops,lines:[{label:"Tarifa transporte",value:fmt(tarifaT)},urg&&{label:"⚡ Urgente",value:"+"+fmt(xU),color:ROSE},xViat>0&&{label:"Viáticos",value:"+"+fmt(xViat),color:AMBER},{label:"Subtotal",value:fmt(sub)},{label:"IVA 16%",value:fmt(iva),color:MUTED},{label:"TOTAL",value:fmt(total),bold:true,color:A}].filter(Boolean),flota:{vans,dias:diasOp,capDia},totalPDV,plazo,total};printPDF(q);}} className="btn"
+              style={{flex:1,padding:"13px 0",borderRadius:12,border:"1.5px solid "+BORDER2,background:"#fff",fontFamily:SANS,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:7,color:TEXT}}>
+              <Printer size={14}/>PDF
             </button>
-            {mapsURL&&<a href={mapsURL} target="_blank" rel="noopener noreferrer" className="btn" style={{flex:1,padding:"14px 0",borderRadius:13,border:`1.5px solid ${T.blue}28`,background:T.blueDim,cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:T.blue,textDecoration:"none"}}>
-              <Globe size={15}/>Maps
+            {mapU&&<a href={mapU} target="_blank" rel="noopener noreferrer" className="btn"
+              style={{flex:1,padding:"13px 0",borderRadius:12,border:"1.5px solid "+BLUE+"28",background:BLUE+"0e",fontFamily:SANS,fontWeight:700,fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",gap:7,color:BLUE,textDecoration:"none"}}>
+              <Globe size={14}/>Maps
             </a>}
           </div>
         </div>
 
-        {/* ── RIGHT: SUMMARY + SAVED ROUTES ── */}
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          {/* COST SUMMARY */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
-            <div style={{background:"linear-gradient(135deg,#fff7ed,#fef3c7)",padding:"18px 20px",borderBottom:`1px solid ${T.border}`}}>
-              <div style={{fontFamily:T.mono,fontSize:10,color:T.accent,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:6}}>Costo total de ruta</div>
-              <div style={{fontFamily:T.mono,fontWeight:700,fontSize:34,color:T.text,lineHeight:1}}>{fmt(total)}</div>
-              <div style={{fontSize:12,color:T.muted,marginTop:4}}>MXN con IVA · {stops.filter(s=>!s.isOrigin).length} destinos</div>
+        <div style={{display:"flex",flexDirection:"column",gap:13}}>
+          <div style={{background:"#fff",border:"1.5px solid "+BORDER,borderRadius:15,overflow:"hidden",boxShadow:"0 4px 18px rgba(12,24,41,.07)"}}>
+            <div style={{borderTop:"3px solid "+VIOLET,padding:"17px 19px 13px",borderBottom:"1px solid "+BORDER}}>
+              <div style={{fontFamily:MONO,fontSize:9,color:VIOLET,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:7}}>COSTO TOTAL DE RUTA</div>
+              <div style={{fontFamily:MONO,fontWeight:700,fontSize:34,color:TEXT,lineHeight:1}}>{fmt(total)}</div>
+              <div style={{fontSize:11,color:MUTED,marginTop:4}}>{stops.filter(s=>!s.isOrigin).length} destinos · {totalPDV.toLocaleString()} PDVs</div>
             </div>
-            <div style={{padding:"16px 20px"}}>
-              {[
-                {l:`Tarifa transporte (×${camionetas} vans)`,v:fmt(tarifaTransp)},
-                urgente&&{l:"⚡ Urgente +35%",v:`+${fmt(xUrg)}`,c:T.rose},
-                xComida>0&&{l:`🍽️ Comidas`,v:`+${fmt(xComida)}`,c:T.amber},
-                xHotel>0&&{l:`🏨 Hotel`,v:`+${fmt(xHotel)}`,c:T.blue},
-                {l:"Subtotal",v:fmt(subtotal)},
-                {l:"IVA 16%",v:fmt(iva),c:T.muted},
-              ].filter(Boolean).map(({l,v,c},i)=>(
-                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:`1px solid ${T.border}`,fontSize:12}}>
-                  <span style={{color:T.muted}}>{l}</span>
-                  <span style={{fontFamily:T.mono,fontWeight:700,color:c||T.text}}>{v}</span>
+            <div style={{padding:"13px 17px"}}>
+              {[[fmt(tarifaT),"Transporte×"+vans],[xU>0&&"+"+fmt(xU),"⚡ Urgente",ROSE],[xViat>0&&"+"+fmt(xViat),"Viáticos",AMBER],[fmt(sub),"Subtotal"],[fmt(iva),"IVA 16%",MUTED]].filter(r=>r&&r[0]).map(([v,l,c],i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+BORDER,fontSize:12}}>
+                  <span style={{color:MUTED}}>{l}</span><span style={{fontFamily:MONO,fontWeight:700,color:c||TEXT}}>{v}</span>
                 </div>
               ))}
-              <div style={{display:"flex",justifyContent:"space-between",padding:"12px 0",fontSize:15,fontWeight:800}}>
-                <span style={{color:T.text}}>TOTAL</span>
-                <span style={{fontFamily:T.mono,color:T.accent,fontSize:20}}>{fmt(total)}</span>
+              <div style={{display:"flex",justifyContent:"space-between",padding:"11px 0",fontSize:15,fontWeight:800}}>
+                <span>TOTAL</span><span style={{fontFamily:MONO,color:A,fontSize:20}}>{fmt(total)}</span>
               </div>
             </div>
           </div>
 
-          {/* ROUTE STOPS SUMMARY */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:18}}>
-            <div style={{fontSize:10,fontWeight:800,color:T.muted,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:12}}>Resumen de ruta</div>
+          {stops.filter(s=>!s.isOrigin).length>0&&<div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:14,padding:16}}>
+            <div style={{fontSize:10,fontWeight:800,color:MUTED,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:11}}>Resumen de paradas</div>
             {stops.map((s,i)=>(
-              <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                <div style={{width:22,height:22,borderRadius:"50%",background:s.isOrigin?`${T.blue}18`:`${T.accent}18`,border:`2px solid ${s.isOrigin?T.blue:T.accent}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:9,fontWeight:700,color:s.isOrigin?T.blue:T.accent}}>{i+1}</div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:600,color:T.text}}>{s.city}</div>
-                  {!s.isOrigin&&<div style={{fontSize:10,color:T.muted}}>{s.pdv>0?`${s.pdv} PDVs`:"Sin PDVs"} · {fmt(s.base||0)}</div>}
-                </div>
-                {i<stops.length-1&&<ArrowRight size={11} color={T.muted}/>}
+              <div key={s.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
+                <div style={{width:20,height:20,borderRadius:"50%",background:s.isOrigin?BLUE+"14":A+"14",border:"2px solid "+(s.isOrigin?BLUE:A),display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:s.isOrigin?BLUE:A,flexShrink:0}}>{i+1}</div>
+                <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>{s.city}</div>{!s.isOrigin&&<div style={{fontSize:10,color:MUTED}}>{s.pdv>0?s.pdv+" PDVs":""} {s.base>0?fmt(s.base):""}</div>}</div>
+                {i<stops.length-1&&<ArrowRight size={10} color={MUTED}/>}
               </div>
             ))}
-            <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",fontSize:12}}>
-              <span style={{color:T.muted}}>~{totalKm.toLocaleString()} km totales</span>
-              <span style={{color:T.muted}}>{totalPDV.toLocaleString()} PDVs</span>
-            </div>
-          </div>
+          </div>}
 
-          {/* SAVED ROUTES */}
-          <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
-            <div style={{padding:"14px 18px",borderBottom:`1px solid ${T.border}`}}>
-              <span style={{fontFamily:T.display,fontWeight:700,fontSize:14,color:T.text}}>Rutas guardadas ({rutas.length})</span>
-            </div>
-            <div style={{maxHeight:360,overflowY:"auto"}}>
-              {loadingRutas?<Loader text="Cargando rutas…"/>:rutas.length===0?<div style={{padding:24,textAlign:"center",fontSize:13,color:T.muted}}>Sin rutas guardadas</div>
+          <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:14,overflow:"hidden"}}>
+            <div style={{padding:"13px 16px",borderBottom:"1px solid "+BORDER}}><span style={{fontFamily:DISPLAY,fontWeight:700,fontSize:13}}>Rutas guardadas ({rutas.length})</span></div>
+            <div style={{maxHeight:340,overflowY:"auto"}}>
+              {loadR?<div style={{padding:30,textAlign:"center",color:MUTED,fontSize:12}}>Cargando…</div>
+              :rutas.length===0?<div style={{padding:30,textAlign:"center",color:MUTED,fontSize:12}}>Sin rutas guardadas</div>
               :rutas.map(r=>(
-                <div key={r.id} className="fade-row" style={{padding:"12px 18px",borderBottom:`1px solid ${T.border}`,cursor:"pointer"}} onClick={()=>setViewRuta(r)}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-                    <div style={{fontWeight:700,fontSize:13,color:T.text}}>{r.nombre}</div>
-                    <Tag color={statusColor[r.status]||T.muted} sm>{r.status||"Programada"}</Tag>
+                <div key={r.id} className="fr" style={{padding:"11px 16px",borderBottom:"1px solid "+BORDER,cursor:"pointer"}} onClick={()=>setViewR(r)}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+                    <div style={{fontWeight:700,fontSize:13}}>{r.nombre}</div>
+                    <Tag color={sc[r.status]||MUTED} sm>{r.status||"Programada"}</Tag>
                   </div>
-                  <div style={{fontSize:11,color:T.muted,marginBottom:4}}>{r.cliente||"Sin cliente"} · {r.stops?.length||0} paradas</div>
-                  <div style={{display:"flex",gap:8}}>
-                    <Tag color={T.accent} sm>{fmt(r.total||0)}</Tag>
-                    <Tag color={T.violet} sm>{r.camionetas||1} vans</Tag>
-                    {r.totalPDV>0&&<Tag color={T.blue} sm>{(r.totalPDV||0).toLocaleString()} PDVs</Tag>}
-                  </div>
+                  <div style={{fontSize:11,color:MUTED,marginBottom:4}}>{r.cliente||"Sin cliente"} · {r.stops?.length||0} paradas</div>
+                  <div style={{display:"flex",gap:7}}><Tag color={A} sm>{fmt(r.total||0)}</Tag><Tag color={VIOLET} sm>{r.vans||1} vans</Tag></div>
                 </div>
               ))}
             </div>
@@ -1520,302 +1242,262 @@ function PlanificadorRutas({onSaved}){
         </div>
       </div>
 
-      {/* RUTA DETAIL MODAL */}
-      {viewRuta&&<Modal title={viewRuta.nombre} onClose={()=>setViewRuta(null)} wide icon={Route} iconColor={T.violet}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:18}}>
-          <InfoBox icon={Truck} color={T.accent} title="Camionetas" value={`${viewRuta.camionetas||1} unidades`} sub={VEHICULOS.find(v=>v.k===viewRuta.vehiculo)?.label}/>
-          <InfoBox icon={Calendar} color={T.blue} title="Días operación" value={`${viewRuta.diasOp||"—"} días`} sub={`Plazo: ${viewRuta.plazo||"—"} días`}/>
-          <InfoBox icon={Package} color={T.violet} title="PDVs totales" value={(viewRuta.totalPDV||0).toLocaleString()} sub={`${viewRuta.capDia||0}/día`}/>
-          <InfoBox icon={Globe} color={T.green} title="Kilómetros" value={`~${(viewRuta.totalKm||0).toLocaleString()} km`}/>
+      {viewR&&<Modal title={viewR.nombre} onClose={()=>setViewR(null)} wide icon={Route} iconColor={VIOLET}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:16}}>
+          <InfoBox icon={Truck} color={A} title="Vans" value={viewR.vans||1} sub={VEHK.find(v=>v.k===viewR.veh)?.label}/>
+          <InfoBox icon={Calendar} color={BLUE} title="Días" value={(viewR.diasOp||"—")+" días"} sub={"Plazo: "+(viewR.plazo||"—")+" días"}/>
+          <InfoBox icon={Package} color={VIOLET} title="PDVs" value={(viewR.totalPDV||0).toLocaleString()} sub={(viewR.capDia||0)+"/día"}/>
+          <InfoBox icon={Globe} color={GREEN} title="~Km" value={(viewR.totalKm||0).toLocaleString()}/>
         </div>
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:11,fontWeight:700,color:T.muted,marginBottom:10,letterSpacing:"0.05em",textTransform:"uppercase"}}>Paradas</div>
-          {(viewRuta.stops||[]).map((s,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:`1px solid ${T.border}`}}>
-              <div style={{width:20,height:20,borderRadius:"50%",background:`${T.accent}14`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:T.accent,flexShrink:0}}>{i+1}</div>
+        <div style={{marginBottom:14}}>
+          {(viewR.stops||[]).map((s,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0",borderBottom:"1px solid "+BORDER}}>
+              <div style={{width:20,height:20,borderRadius:"50%",background:A+"14",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:A,flexShrink:0}}>{i+1}</div>
               <div style={{flex:1,fontWeight:600,fontSize:13}}>{s.city}</div>
-              {s.pdv>0&&<Tag color={T.accent} sm>{s.pdv} PDVs</Tag>}
-              {s.km>0&&<span style={{fontFamily:T.mono,fontSize:10,color:T.muted}}>{s.km.toLocaleString()} km</span>}
+              {s.pdv>0&&<Tag color={A} sm>{s.pdv} PDVs</Tag>}
             </div>
           ))}
         </div>
-        <div style={{display:"flex",gap:10}}>
-          {viewRuta.mapsURL&&<a href={viewRuta.mapsURL} target="_blank" rel="noopener noreferrer" className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:T.blueDim,border:`1.5px solid ${T.blue}28`,color:T.blue,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontFamily:T.sans,fontWeight:700,fontSize:14}}><Globe size={15}/>Google Maps</a>}
-          <button onClick={()=>{generateQuotePDF({...viewRuta,lines:[{label:"Tarifa transporte",value:fmt(viewRuta.tarifaTransp||0)},{label:"Viáticos",value:fmt(viewRuta.xViatic||0)},{label:"Subtotal",value:fmt(viewRuta.subtotal||0)},{label:"IVA 16%",value:fmt(viewRuta.iva||0)},{label:"TOTAL",value:fmt(viewRuta.total||0),bold:true,color:T.accent}]});}} className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:"#ffffff",border:`1.5px solid ${T.border2}`,cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,color:T.text,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Printer size={15}/>PDF</button>
-          <button onClick={async()=>{await updateDoc(doc(db,"rutas",viewRuta.id),{status:viewRuta.status==="En curso"?"Completada":"En curso"});setViewRuta(null);}} className="btn" style={{flex:1,padding:"11px 0",borderRadius:11,background:`linear-gradient(135deg,${T.accent},#fb923c)`,border:"none",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>{viewRuta.status==="En curso"?<><CheckCircle size={15}/>Completar</>:<><Navigation size={15}/>Iniciar</>}</button>
+        <div style={{display:"flex",gap:9}}>
+          {viewR.mapURL&&<a href={viewR.mapURL} target="_blank" rel="noopener noreferrer" className="btn" style={{flex:1,padding:"10px 0",borderRadius:10,background:BLUE+"0e",border:"1.5px solid "+BLUE+"28",color:BLUE,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:7,fontFamily:SANS,fontWeight:700,fontSize:13}}><Globe size={14}/>Google Maps</a>}
+          <button onClick={async()=>{await updateDoc(doc(db,"rutas",viewR.id),{status:viewR.status==="En curso"?"Completada":"En curso"});setViewR(null);}} className="btn"
+            style={{flex:1,padding:"10px 0",borderRadius:10,background:"linear-gradient(135deg,"+A+",#fb923c)",border:"none",cursor:"pointer",fontFamily:SANS,fontWeight:700,fontSize:13,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
+            {viewR.status==="En curso"?<><CheckCircle size={14}/>Completar</>:<><Navigation size={14}/>Iniciar</>}
+          </button>
         </div>
       </Modal>}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   FACTURACIÓN — CON PDF PROFESIONAL
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── FACTURAS ──────────────────────────────────────────────────────────── */
 function Facturas(){
-  const [items,setItems]=useState([]);const [loading,setLoading]=useState(true);
-  const [modal,setModal]=useState(false);const [toast,setToast]=useState(null);
-  const [filtroMes,setFiltroMes]=useState("todos");
-  const [form,setForm]=useState({cliente:"",servicio:"",concepto:"",monto:"",iva:true,status:"Pendiente",notas:""});
-  const showToast=(m,t="ok")=>{setToast({msg:m,type:t});};
-  useEffect(()=>{const u=onSnapshot(collection(db,"facturas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));setLoading(false);});return u;},[]);
-  const save=async()=>{if(!form.cliente||!form.monto){showToast("Cliente y monto son requeridos","err");return;}
-    const monto=parseFloat(form.monto)||0;const iva=form.iva?monto*.16:0;const total=monto+iva;
-    const folio="FAC-"+Date.now().toString(36).slice(-6).toUpperCase();
-    try{await addDoc(collection(db,"facturas"),{...form,monto,iva,total,folio,createdAt:serverTimestamp()});setModal(false);setForm({cliente:"",servicio:"",concepto:"",monto:"",iva:true,status:"Pendiente",notas:""});showToast("✓ Factura creada");}catch(e){showToast(e.message,"err");}};
-  const del=async(id)=>{if(!window.confirm("¿Eliminar?"))return;await deleteDoc(doc(db,"facturas",id));showToast("Eliminada");};
-  const updateStatus=async(id,status)=>updateDoc(doc(db,"facturas",id),{status});
-  const meses=["todos","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-  const filtered=filtroMes==="todos"?items:items.filter(f=>{const d=f.createdAt?.seconds;return d&&new Date(d*1000).getMonth()===meses.indexOf(filtroMes)-1;});
-  const total=filtered.reduce((a,f)=>a+(f.total||0),0);
-  const cobrado=filtered.filter(f=>f.status==="Pagada").reduce((a,f)=>a+(f.total||0),0);
-  const pendiente=filtered.filter(f=>f.status==="Pendiente").reduce((a,f)=>a+(f.total||0),0);
-  const handlePDF=async(f)=>{
-    generateQuotePDF({
-      folio:f.folio||"FAC",cliente:f.cliente,modo:"factura",
-      destino:f.servicio||"Servicio logístico",vehiculoLabel:f.concepto||"",
-      lines:[
-        {label:"Subtotal",value:fmt(f.monto||0)},
-        f.iva>0&&{label:"IVA 16%",value:fmt(f.iva||0),color:T.muted},
-        {label:"TOTAL",value:fmt(f.total||0),bold:true,color:T.accent},
-      ].filter(Boolean),
-      notas:f.notas||"Factura emitida conforme a los servicios prestados.",
-      total:f.total||0,
-    });
+  const [items,setItems]=useState([]);const[load,setLoad]=useState(true);
+  const[modal,setModal]=useState(false);const[toast,setToast]=useState(null);
+  const[mes,setMes]=useState("todos");
+  const[form,setForm]=useState({cliente:"",servicio:"",monto:"",iva:true,status:"Pendiente",notas:""});
+  const showT=(m,t="ok")=>setToast({msg:m,type:t});
+  useEffect(()=>onSnapshot(collection(db,"facturas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));setLoad(false);}),[]);
+  const save=async()=>{
+    if(!form.cliente||!form.monto){showT("Cliente y monto requeridos","err");return;}
+    const monto=parseFloat(form.monto)||0;const xIva=form.iva?monto*.16:0;
+    try{await addDoc(collection(db,"facturas"),{...form,monto,iva:xIva,total:monto+xIva,folio:"FAC-"+uid(),createdAt:serverTimestamp()});
+    setModal(false);setForm({cliente:"",servicio:"",monto:"",iva:true,status:"Pendiente",notas:""});showT("✓ Factura creada");}
+    catch(e){showT(e.message,"err");}
   };
-  const statusColor={Pendiente:T.amber,Pagada:T.green,Vencida:T.rose};
+  const del=async id=>{if(!confirm("¿Eliminar?"))return;await deleteDoc(doc(db,"facturas",id));showT("Eliminada");};
+  const upd=async(id,status)=>updateDoc(doc(db,"facturas",id),{status});
+  const MESES=["todos","Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  const filt=mes==="todos"?items:items.filter(f=>{const d=f.createdAt?.seconds;return d&&new Date(d*1000).getMonth()===MESES.indexOf(mes)-1;});
+  const tot=filt.reduce((a,f)=>a+(f.total||0),0);
+  const cob=filt.filter(f=>f.status==="Pagada").reduce((a,f)=>a+(f.total||0),0);
+  const pen=filt.filter(f=>f.status==="Pendiente").reduce((a,f)=>a+(f.total||0),0);
+  const sc={Pendiente:AMBER,Pagada:GREEN,Vencida:ROSE};
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
+    <div style={{flex:1,overflowY:"auto",padding:"28px 32px",background:"#f1f4fb"}}>
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
-      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
-        <div><h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Facturación</h1><p style={{color:T.muted,fontSize:13,marginTop:4}}>Gestión de cobros y emisión de facturas en PDF</p></div>
-        <button onClick={()=>setModal(true)} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"11px 20px",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 4px 20px ${T.accent}30`}}><Plus size={15}/>Nueva factura</button>
+      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22}}>
+        <div><h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:28,color:TEXT,letterSpacing:"-0.03em"}}>Facturación</h1><p style={{color:MUTED,fontSize:13,marginTop:3}}>Gestión de cobros · PDFs profesionales</p></div>
+        <button onClick={()=>setModal(true)} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:12,padding:"10px 18px",fontFamily:SANS,fontWeight:700,fontSize:14,boxShadow:"0 4px 16px "+A+"30"}}><Plus size={14}/>Nueva factura</button>
       </div>
-
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:20}}>
-        <KpiCard icon={BarChart2} color={T.blue} label="Total emitido" value={fmtK(total)} sub={`${filtered.length} facturas`}/>
-        <KpiCard icon={CheckCircle} color={T.green} label="Cobrado" value={fmtK(cobrado)} sub="facturas pagadas"/>
-        <KpiCard icon={Clock} color={T.amber} label="Pendiente" value={fmtK(pendiente)} sub="por cobrar"/>
-        <KpiCard icon={AlertCircle} color={T.rose} label="Vencido" value={fmtK(filtered.filter(f=>f.status==="Vencida").reduce((a,f)=>a+(f.total||0),0))} sub="facturas vencidas"/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:18}}>
+        <KpiCard icon={BarChart2} color={BLUE} label="Total emitido" value={fmtK(tot)} sub={filt.length+" facturas"}/>
+        <KpiCard icon={CheckCircle} color={GREEN} label="Cobrado" value={fmtK(cob)}/>
+        <KpiCard icon={Clock} color={AMBER} label="Pendiente" value={fmtK(pen)}/>
+        <KpiCard icon={AlertCircle} color={ROSE} label="Vencido" value={fmtK(filt.filter(f=>f.status==="Vencida").reduce((a,f)=>a+(f.total||0),0))}/>
       </div>
-
-      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:16}}>
-        {meses.map(m=>(
-          <button key={m} onClick={()=>setFiltroMes(m)} className="btn" style={{padding:"6px 14px",borderRadius:8,border:`1.5px solid ${filtroMes===m?T.accent:T.border2}`,background:filtroMes===m?`${T.accent}12`:"transparent",color:filtroMes===m?T.accent:T.muted,fontFamily:T.sans,fontSize:12,fontWeight:filtroMes===m?700:500,cursor:"pointer"}}>{m==="todos"?"Todos":m}</button>
-        ))}
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+        {MESES.map(m=><button key={m} onClick={()=>setMes(m)} className="btn" style={{padding:"5px 13px",borderRadius:8,border:"1.5px solid "+(mes===m?A:BORDER2),background:mes===m?A+"10":"#fff",color:mes===m?A:MUTED,fontFamily:SANS,fontSize:12,fontWeight:mes===m?700:500,cursor:"pointer"}}>{m==="todos"?"Todos":m}</button>)}
       </div>
-
-      {loading?<Loader/>:<div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
-        {filtered.length===0?<div style={{padding:48,textAlign:"center",color:T.muted,fontSize:13}}>Sin facturas. <button onClick={()=>setModal(true)} style={{color:T.accent,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Crear →</button></div>
+      {load?<div style={{padding:40,textAlign:"center",color:MUTED}}>Cargando…</div>
+      :<div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,overflow:"hidden"}}>
+        {filt.length===0?<div style={{padding:40,textAlign:"center",color:MUTED,fontSize:13}}>Sin facturas. <button onClick={()=>setModal(true)} style={{color:A,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Crear →</button></div>
         :<table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
-            {["Folio","Cliente","Servicio","Subtotal","IVA","Total","Fecha","Estado",""].map(h=><th key={h} style={{padding:"10px 14px",textAlign:"left",fontFamily:T.sans,fontSize:11,color:T.muted,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase"}}>{h}</th>)}
-          </tr></thead>
-          <tbody>
-            {filtered.map((f,i)=>(
-              <tr key={f.id||i} className="fade-row" style={{borderBottom:`1px solid ${T.border}`}}>
-                <td style={{padding:"12px 14px",fontFamily:T.mono,fontSize:11,color:T.muted}}>{f.folio||"—"}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.sans,fontSize:13,fontWeight:700,color:T.text}}>{f.cliente}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.sans,fontSize:12,color:T.muted,maxWidth:160}}>{f.servicio||"—"}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.mono,fontSize:12,color:T.text}}>{fmt(f.monto||0)}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.mono,fontSize:12,color:T.muted}}>{fmt(f.iva||0)}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.mono,fontSize:13,fontWeight:700,color:T.text}}>{fmt(f.total||0)}</td>
-                <td style={{padding:"12px 14px",fontFamily:T.mono,fontSize:11,color:T.muted}}>{f.createdAt?.seconds?new Date(f.createdAt.seconds*1000).toLocaleDateString("es-MX"):"—"}</td>
-                <td style={{padding:"12px 14px"}}>
-                  <select value={f.status||"Pendiente"} onChange={e=>updateStatus(f.id,e.target.value)} style={{background:"transparent",border:`1.5px solid ${statusColor[f.status]||T.muted}28`,borderRadius:8,padding:"3px 8px",color:statusColor[f.status]||T.muted,fontFamily:T.sans,fontSize:11,fontWeight:700,cursor:"pointer",outline:"none"}}>
-                    {["Pendiente","Pagada","Vencida"].map(s=><option key={s} value={s}>{s}</option>)}
-                  </select>
-                </td>
-                <td style={{padding:"12px 14px",display:"flex",gap:6}}>
-                  <button onClick={()=>handlePDF(f)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.blue}}><Printer size={13}/></button>
-                  <button onClick={()=>del(f.id)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.muted}}><Trash2 size={13}/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>}
-      </div>}
-
-      {modal&&<Modal title="Nueva factura" onClose={()=>setModal(false)} icon={FileText} iconColor={T.blue}>
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <Input label="Cliente *" value={form.cliente} onChange={e=>setForm({...form,cliente:e.target.value})} placeholder="Nombre de la empresa"/>
-          <Input label="Servicio / Descripción" value={form.servicio} onChange={e=>setForm({...form,servicio:e.target.value})} placeholder="Ej: Distribución masiva MTY"/>
-          <Input label="Concepto adicional" value={form.concepto} onChange={e=>setForm({...form,concepto:e.target.value})} placeholder="Referencia de ruta, folio, etc."/>
-          <Input label="Monto sin IVA *" type="number" value={form.monto} onChange={e=>setForm({...form,monto:e.target.value})} placeholder="0.00"/>
-          <Toggle checked={form.iva} onChange={v=>setForm({...form,iva:v})} label="Incluir IVA 16%" sub={form.monto?`IVA: ${fmt((parseFloat(form.monto)||0)*.16)}`:"Cálculo automático"} accent={T.blue}/>
-          <div style={{padding:"12px 14px",background:T.accentDim,borderRadius:10,border:`1px solid ${T.accent}28`}}>
-            <div style={{fontSize:11,color:T.muted,marginBottom:4}}>Total a facturar</div>
-            <div style={{fontFamily:T.mono,fontSize:24,fontWeight:700,color:T.accent}}>
-              {fmt((parseFloat(form.monto)||0)+(form.iva?(parseFloat(form.monto)||0)*.16:0))}
-            </div>
-          </div>
-          <Select label="Estado" value={form.status} onChange={e=>setForm({...form,status:e.target.value})} options={["Pendiente","Pagada"]}/>
-          <Textarea label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Notas adicionales…"/>
-          <button onClick={save} className="btn" style={{background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"13px 0",cursor:"pointer",fontFamily:T.display,fontWeight:700,fontSize:16}}>Crear factura</button>
-        </div>
-      </Modal>}
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   CLIENTES
-═══════════════════════════════════════════════════════════════════════════ */
-function Clientes(){
-  const [items,setItems]=useState([]);const [loading,setLoading]=useState(true);
-  const [modal,setModal]=useState(false);const [toast,setToast]=useState(null);
-  const [search,setSearch]=useState("");
-  const [form,setForm]=useState({nombre:"",contacto:"",email:"",tel:"",rfc:"",plan:"Standard",notas:""});
-  const showToast=(m,t="ok")=>{setToast({msg:m,type:t});};
-  useEffect(()=>{const u=onSnapshot(collection(db,"cuentas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})));setLoading(false);});return u;},[]);
-  const save=async()=>{if(!form.nombre){showToast("Nombre requerido","err");return;}try{await addDoc(collection(db,"cuentas"),{...form,createdAt:serverTimestamp()});setModal(false);setForm({nombre:"",contacto:"",email:"",tel:"",rfc:"",plan:"Standard",notas:""});showToast("✓ Cliente creado");}catch(e){showToast(e.message,"err");}};
-  const del=async(id)=>{if(!window.confirm("¿Eliminar?"))return;await deleteDoc(doc(db,"cuentas",id));showToast("Eliminado");};
-  const filt=items.filter(c=>c.nombre?.toLowerCase().includes(search.toLowerCase())||c.contacto?.toLowerCase().includes(search.toLowerCase()));
-  const planColor={Enterprise:T.accent,Premium:T.violet,Standard:T.blue,Básico:T.muted};
-  return(
-    <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
-      {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
-      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
-        <div><h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Clientes</h1><p style={{color:T.muted,fontSize:13,marginTop:4}}>{items.length} cuentas activas</p></div>
-        <button onClick={()=>setModal(true)} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"11px 20px",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,boxShadow:`0 4px 20px ${T.accent}30`}}><Plus size={15}/>Nuevo cliente</button>
-      </div>
-      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cliente…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
-      {loading?<Loader/>:<div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,overflow:"hidden"}}>
-        {filt.length===0?<div style={{padding:48,textAlign:"center",color:T.muted,fontSize:13}}>Sin clientes. <button onClick={()=>setModal(true)} style={{color:T.accent,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Agregar →</button></div>
-        :<table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{borderBottom:`1px solid ${T.border}`}}>
-            {["Empresa","Plan","Contacto","Email / Tel","RFC",""].map(h=><th key={h} style={{padding:"10px 18px",textAlign:"left",fontFamily:T.sans,fontSize:11,color:T.muted,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase"}}>{h}</th>)}
-          </tr></thead>
-          <tbody>{filt.map((c,i)=>(
-            <tr key={c.id||i} className="fade-row" style={{borderBottom:`1px solid ${T.border}`}}>
-              <td style={{padding:"13px 18px",fontWeight:700,fontSize:13,color:T.text}}>{c.nombre}</td>
-              <td style={{padding:"13px 18px"}}><Tag color={planColor[c.plan]||T.muted}>{c.plan}</Tag></td>
-              <td style={{padding:"13px 18px",fontSize:12,color:T.muted}}>{c.contacto||"—"}</td>
-              <td style={{padding:"13px 18px",fontSize:12,color:T.muted}}>{[c.email,c.tel].filter(Boolean).join(" · ")||"—"}</td>
-              <td style={{padding:"13px 18px",fontFamily:T.mono,fontSize:11,color:T.muted}}>{c.rfc||"—"}</td>
-              <td style={{padding:"13px 18px"}}><button onClick={()=>del(c.id)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.muted}}><Trash2 size={13}/></button></td>
+          <thead><tr style={{borderBottom:"1px solid "+BORDER}}>{["Folio","Cliente","Servicio","Subtotal","IVA","Total","Fecha","Estado",""].map(h=><th key={h} style={{padding:"9px 14px",textAlign:"left",fontFamily:SANS,fontSize:10,color:MUTED,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{h}</th>)}</tr></thead>
+          <tbody>{filt.map((f,i)=>(
+            <tr key={f.id||i} className="fr" style={{borderBottom:"1px solid "+BORDER}}>
+              <td style={{padding:"11px 14px",fontFamily:MONO,fontSize:10,color:MUTED}}>{f.folio||"—"}</td>
+              <td style={{padding:"11px 14px",fontWeight:700,fontSize:13}}>{f.cliente}</td>
+              <td style={{padding:"11px 14px",fontSize:12,color:MUTED,maxWidth:140}}>{f.servicio||"—"}</td>
+              <td style={{padding:"11px 14px",fontFamily:MONO,fontSize:12}}>{fmt(f.monto||0)}</td>
+              <td style={{padding:"11px 14px",fontFamily:MONO,fontSize:12,color:MUTED}}>{fmt(f.iva||0)}</td>
+              <td style={{padding:"11px 14px",fontFamily:MONO,fontSize:13,fontWeight:700}}>{fmt(f.total||0)}</td>
+              <td style={{padding:"11px 14px",fontFamily:MONO,fontSize:10,color:MUTED}}>{f.createdAt?.seconds?new Date(f.createdAt.seconds*1000).toLocaleDateString("es-MX"):"—"}</td>
+              <td style={{padding:"11px 14px"}}>
+                <select value={f.status||"Pendiente"} onChange={e=>upd(f.id,e.target.value)}
+                  style={{background:"transparent",border:"1.5px solid "+(sc[f.status]||MUTED)+"28",borderRadius:8,padding:"3px 7px",color:sc[f.status]||MUTED,fontFamily:SANS,fontSize:11,fontWeight:700,cursor:"pointer"}}>
+                  {["Pendiente","Pagada","Vencida"].map(s=><option key={s} value={s}>{s}</option>)}
+                </select>
+              </td>
+              <td style={{padding:"11px 14px",display:"flex",gap:5}}>
+                <button onClick={()=>printPDF({folio:f.folio||"FAC",cliente:f.cliente,modo:"factura",modoLabel:"FACTURA",destino:f.servicio||"Servicio",vehiculoLabel:"",lines:[{label:"Subtotal",value:fmt(f.monto||0)},f.iva>0&&{label:"IVA 16%",value:fmt(f.iva||0),color:MUTED},{label:"TOTAL",value:fmt(f.total||0),bold:true,color:A}].filter(Boolean),notas:f.notas||"",total:f.total||0})} className="btn" style={{color:BLUE}}><Printer size={12}/></button>
+                <button onClick={()=>del(f.id)} className="btn" style={{color:MUTED}}><Trash2 size={12}/></button>
+              </td>
             </tr>
           ))}</tbody>
         </table>}
       </div>}
-      {modal&&<Modal title="Nuevo cliente" onClose={()=>setModal(false)} icon={Building2} iconColor={T.blue}>
+      {modal&&<Modal title="Nueva factura" onClose={()=>setModal(false)} icon={FileText} iconColor={BLUE}>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <Input label="Empresa / Nombre *" value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})} placeholder="Ej: Walmart de México"/>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            <Input label="Contacto" value={form.contacto} onChange={e=>setForm({...form,contacto:e.target.value})} placeholder="Nombre del contacto"/>
-            <Input label="Teléfono" value={form.tel} onChange={e=>setForm({...form,tel:e.target.value})} placeholder="+52 55 0000 0000"/>
-            <Input label="Email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="correo@empresa.com"/>
-            <Input label="RFC" value={form.rfc} onChange={e=>setForm({...form,rfc:e.target.value})} placeholder="XAXX010101000"/>
+          <Inp label="Cliente *" value={form.cliente} onChange={e=>setForm({...form,cliente:e.target.value})} placeholder="Empresa"/>
+          <Inp label="Servicio / Descripción" value={form.servicio} onChange={e=>setForm({...form,servicio:e.target.value})} placeholder="Ej: Distribución masiva MTY"/>
+          <Inp label="Monto sin IVA *" type="number" value={form.monto} onChange={e=>setForm({...form,monto:e.target.value})} placeholder="0.00"/>
+          <Tog checked={form.iva} onChange={v=>setForm({...form,iva:v})} label="Incluir IVA 16%" sub={form.monto?"IVA: "+fmt((parseFloat(form.monto)||0)*.16):"Cálculo automático"} color={BLUE}/>
+          <div style={{padding:"11px 14px",background:"#fff8f3",borderRadius:10,border:"1px solid "+A+"20"}}>
+            <div style={{fontSize:10,color:MUTED,marginBottom:3}}>Total a facturar</div>
+            <div style={{fontFamily:MONO,fontSize:24,fontWeight:700,color:A}}>{fmt((parseFloat(form.monto)||0)+(form.iva?(parseFloat(form.monto)||0)*.16:0))}</div>
           </div>
-          <div><div style={{fontSize:11,fontWeight:700,color:T.muted,marginBottom:8,letterSpacing:"0.05em",textTransform:"uppercase"}}>Plan</div>
-          <div style={{display:"flex",gap:8}}>{["Básico","Standard","Premium","Enterprise"].map(p=>(
-            <button key={p} onClick={()=>setForm({...form,plan:p})} className="btn" style={{flex:1,padding:"9px 0",borderRadius:10,border:`2px solid ${form.plan===p?(planColor[p]||T.accent):T.border2}`,background:form.plan===p?`${planColor[p]||T.accent}10`:"transparent",color:form.plan===p?(planColor[p]||T.accent):T.muted,cursor:"pointer",fontSize:12,fontWeight:form.plan===p?700:500}}>{p}</button>
-          ))}</div></div>
-          <Textarea label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Notas internas…"/>
-          <button onClick={save} className="btn" style={{background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"13px 0",cursor:"pointer",fontFamily:T.display,fontWeight:700,fontSize:16}}>Crear cliente</button>
+          <Sel label="Estado" value={form.status} onChange={e=>setForm({...form,status:e.target.value})} options={["Pendiente","Pagada"]}/>
+          <Txt label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/>
+          <button onClick={save} className="btn" style={{background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:12,padding:"13px 0",fontFamily:DISPLAY,fontWeight:700,fontSize:16}}>Crear factura</button>
         </div>
       </Modal>}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ENTREGAS
-═══════════════════════════════════════════════════════════════════════════ */
-function Entregas(){
-  const [items,setItems]=useState([]);const [loading,setLoading]=useState(true);
-  const [form,setForm]=useState({pdv:"",dir:"",receptor:"",notas:"",status:"Entregado"});
-  const [toast,setToast]=useState(null);const [search,setSearch]=useState("");
-  const showToast=(m,t="ok")=>{setToast({msg:m,type:t});};
-  useEffect(()=>{const u=onSnapshot(collection(db,"entregas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));setLoading(false);});return u;},[]);
-  const save=async()=>{if(!form.pdv){showToast("PDV requerido","err");return;}try{await addDoc(collection(db,"entregas"),{...form,hora:new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}),createdAt:serverTimestamp()});setForm({pdv:"",dir:"",receptor:"",notas:"",status:"Entregado"});showToast("✓ Entrega registrada");}catch(e){showToast(e.message,"err");}};
-  const del=async(id)=>{await deleteDoc(doc(db,"entregas",id));showToast("Eliminada");};
-  const filt=items.filter(e=>e.pdv?.toLowerCase().includes(search.toLowerCase())||e.dir?.toLowerCase().includes(search.toLowerCase()));
-  const sc={Entregado:T.green,"En tránsito":T.blue,Pendiente:T.amber,Rechazado:T.rose};
-  const entregadas=items.filter(e=>e.status==="Entregado").length;
+/* ─── CLIENTES ──────────────────────────────────────────────────────────── */
+function Clientes(){
+  const [items,setItems]=useState([]);const[load,setLoad]=useState(true);
+  const[modal,setModal]=useState(false);const[toast,setToast]=useState(null);
+  const[q,setQ]=useState("");
+  const[form,setForm]=useState({nombre:"",contacto:"",email:"",tel:"",rfc:"",plan:"Standard",notas:""});
+  const showT=(m,t="ok")=>setToast({msg:m,type:t});
+  useEffect(()=>onSnapshot(collection(db,"cuentas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})));setLoad(false);}),[]);
+  const save=async()=>{if(!form.nombre){showT("Nombre requerido","err");return;}try{await addDoc(collection(db,"cuentas"),{...form,createdAt:serverTimestamp()});setModal(false);setForm({nombre:"",contacto:"",email:"",tel:"",rfc:"",plan:"Standard",notas:""});showT("✓ Cliente creado");}catch(e){showT(e.message,"err");}};
+  const del=async id=>{if(!confirm("¿Eliminar?"))return;await deleteDoc(doc(db,"cuentas",id));showT("Eliminado");};
+  const filt=items.filter(c=>c.nombre?.toLowerCase().includes(q.toLowerCase())||c.contacto?.toLowerCase().includes(q.toLowerCase()));
+  const pc={Enterprise:A,Premium:VIOLET,Standard:BLUE,Básico:MUTED};
   return(
-    <div style={{flex:1,overflowY:"auto",padding:"28px 32px"}}>
+    <div style={{flex:1,overflowY:"auto",padding:"28px 32px",background:"#f1f4fb"}}>
       {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
-      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:24}}>
-        <div><h1 style={{fontFamily:T.display,fontWeight:800,fontSize:30,color:T.text,letterSpacing:"-0.03em"}}>Entregas</h1><p style={{color:T.muted,fontSize:13,marginTop:4}}>{items.length} registradas · {entregadas} completadas</p></div>
-        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {[["Entregado",T.green],["En tránsito",T.blue],["Pendiente",T.amber]].map(([s,c])=><Tag key={s} color={c}>{items.filter(e=>e.status===s).length} {s}</Tag>)}
+      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22}}>
+        <div><h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:28,color:TEXT,letterSpacing:"-0.03em"}}>Clientes</h1><p style={{color:MUTED,fontSize:13,marginTop:3}}>{items.length} cuentas activas</p></div>
+        <button onClick={()=>setModal(true)} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:12,padding:"10px 18px",fontFamily:SANS,fontWeight:700,fontSize:14,boxShadow:"0 4px 16px "+A+"30"}}><Plus size={14}/>Nuevo cliente</button>
+      </div>
+      <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:11,padding:"9px 14px",display:"flex",alignItems:"center",gap:9,marginBottom:13}}><Search size={13} color={MUTED}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar cliente…" style={{background:"none",border:"none",fontSize:13,flex:1}}/></div>
+      {load?<div style={{padding:40,textAlign:"center",color:MUTED}}>Cargando…</div>
+      :<div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:15,overflow:"hidden"}}>
+        {filt.length===0?<div style={{padding:40,textAlign:"center",color:MUTED,fontSize:13}}>Sin clientes. <button onClick={()=>setModal(true)} style={{color:A,background:"none",border:"none",cursor:"pointer",fontWeight:700}}>Agregar →</button></div>
+        :<table style={{width:"100%",borderCollapse:"collapse"}}>
+          <thead><tr style={{borderBottom:"1px solid "+BORDER}}>{["Empresa","Plan","Contacto","Email / Tel","RFC",""].map(h=><th key={h} style={{padding:"9px 16px",textAlign:"left",fontFamily:SANS,fontSize:10,color:MUTED,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{h}</th>)}</tr></thead>
+          <tbody>{filt.map((c,i)=>(
+            <tr key={c.id||i} className="fr" style={{borderBottom:"1px solid "+BORDER}}>
+              <td style={{padding:"12px 16px",fontWeight:700,fontSize:13}}>{c.nombre}</td>
+              <td style={{padding:"12px 16px"}}><Tag color={pc[c.plan]||MUTED}>{c.plan}</Tag></td>
+              <td style={{padding:"12px 16px",fontSize:12,color:MUTED}}>{c.contacto||"—"}</td>
+              <td style={{padding:"12px 16px",fontSize:12,color:MUTED}}>{[c.email,c.tel].filter(Boolean).join(" · ")||"—"}</td>
+              <td style={{padding:"12px 16px",fontFamily:MONO,fontSize:11,color:MUTED}}>{c.rfc||"—"}</td>
+              <td style={{padding:"12px 16px"}}><button onClick={()=>del(c.id)} className="btn" style={{color:MUTED}}><Trash2 size={12}/></button></td>
+            </tr>
+          ))}</tbody>
+        </table>}
+      </div>}
+      {modal&&<Modal title="Nuevo cliente" onClose={()=>setModal(false)} icon={Building2} iconColor={BLUE}>
+        <div style={{display:"flex",flexDirection:"column",gap:11}}>
+          <Inp label="Empresa *" value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})}/>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}>
+            <Inp label="Contacto" value={form.contacto} onChange={e=>setForm({...form,contacto:e.target.value})}/>
+            <Inp label="Teléfono" value={form.tel} onChange={e=>setForm({...form,tel:e.target.value})}/>
+            <Inp label="Email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/>
+            <Inp label="RFC" value={form.rfc} onChange={e=>setForm({...form,rfc:e.target.value})}/>
+          </div>
+          <div><div style={{fontSize:10,fontWeight:800,color:MUTED,marginBottom:7,letterSpacing:"0.07em",textTransform:"uppercase"}}>Plan</div>
+          <div style={{display:"flex",gap:7}}>{["Básico","Standard","Premium","Enterprise"].map(p=>(
+            <button key={p} onClick={()=>setForm({...form,plan:p})} className="btn" style={{flex:1,padding:"8px 0",borderRadius:9,border:"2px solid "+(form.plan===p?(pc[p]||A):BORDER2),background:form.plan===p?(pc[p]||A)+"0e":"#fff",color:form.plan===p?(pc[p]||A):MUTED,cursor:"pointer",fontSize:12,fontWeight:form.plan===p?700:500}}>{p}</button>
+          ))}</div></div>
+          <Txt label="Notas" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})}/>
+          <button onClick={save} className="btn" style={{background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:12,padding:"13px 0",fontFamily:DISPLAY,fontWeight:700,fontSize:16}}>Crear cliente</button>
         </div>
+      </Modal>}
+    </div>
+  );
+}
+
+/* ─── ENTREGAS ──────────────────────────────────────────────────────────── */
+function Entregas(){
+  const [items,setItems]=useState([]);const[load,setLoad]=useState(true);
+  const[form,setForm]=useState({pdv:"",dir:"",receptor:"",notas:"",status:"Entregado"});
+  const[toast,setToast]=useState(null);const[q,setQ]=useState("");
+  const showT=(m,t="ok")=>setToast({msg:m,type:t});
+  useEffect(()=>onSnapshot(collection(db,"entregas"),s=>{setItems(s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));setLoad(false);}),[]);
+  const save=async()=>{if(!form.pdv){showT("PDV requerido","err");return;}try{await addDoc(collection(db,"entregas"),{...form,hora:new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}),createdAt:serverTimestamp()});setForm({pdv:"",dir:"",receptor:"",notas:"",status:"Entregado"});showT("✓ Entrega registrada");}catch(e){showT(e.message,"err");}};
+  const del=async id=>{await deleteDoc(doc(db,"entregas",id));showT("Eliminada");};
+  const filt=items.filter(e=>e.pdv?.toLowerCase().includes(q.toLowerCase())||e.dir?.toLowerCase().includes(q.toLowerCase()));
+  const sc={Entregado:GREEN,"En tránsito":BLUE,Pendiente:AMBER,Rechazado:ROSE};
+  return(
+    <div style={{flex:1,overflowY:"auto",padding:"28px 32px",background:"#f1f4fb"}}>
+      {toast&&<Toast msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+      <div className="au" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22}}>
+        <div><h1 style={{fontFamily:DISPLAY,fontWeight:800,fontSize:28,color:TEXT,letterSpacing:"-0.03em"}}>Entregas</h1><p style={{color:MUTED,fontSize:13,marginTop:3}}>{items.length} registradas · {items.filter(e=>e.status==="Entregado").length} completadas</p></div>
+        <div style={{display:"flex",gap:7}}>{[["Entregado",GREEN],["En tránsito",BLUE],["Pendiente",AMBER]].map(([s,c])=><Tag key={s} color={c}>{items.filter(e=>e.status===s).length} {s}</Tag>)}</div>
       </div>
-      <div style={{display:"flex",gap:12,marginBottom:14}}>
-        <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:12,padding:"10px 16px",display:"flex",alignItems:"center",gap:10,flex:1}}><Search size={14} color={T.muted}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar PDV o dirección…" style={{background:"none",border:"none",color:T.text,fontFamily:T.sans,fontSize:13,outline:"none",flex:1}}/></div>
-      </div>
-      {loading?<Loader/>:(
-        <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:20}}>
-          {filt.length===0&&<div style={{padding:40,textAlign:"center",color:T.muted,fontSize:13,background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:14}}>Sin entregas registradas.</div>}
-          {filt.map((e,i)=>{const col=sc[e.status]||T.muted;return(
-            <div key={e.id||i} className="fade-row card-h" style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:13,padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
-              <div style={{width:40,height:40,borderRadius:11,background:`${col}14`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                {e.status==="Entregado"?<CheckCircle size={17} color={col}/>:e.status==="En tránsito"?<Navigation size={17} color={col}/>:<Clock size={17} color={col}/>}
-              </div>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:13,color:T.text,marginBottom:2}}>{e.pdv}</div>
-                <div style={{fontSize:11,color:T.muted}}>{e.dir}</div>
-                {e.receptor&&<div style={{fontSize:11,color:T.green,marginTop:2}}>✓ Recibió: {e.receptor}</div>}
-              </div>
-              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flexShrink:0}}>
-                <Tag color={col} sm>{e.status}</Tag>
-                <span style={{fontFamily:T.mono,fontSize:10,color:T.muted}}>{e.hora} · {e.createdAt?.seconds?new Date(e.createdAt.seconds*1000).toLocaleDateString("es-MX"):"—"}</span>
-              </div>
-              <button onClick={()=>del(e.id)} className="btn" style={{border:"none",background:"transparent",cursor:"pointer",color:T.muted,flexShrink:0}}><Trash2 size={13}/></button>
+      <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:11,padding:"9px 14px",display:"flex",alignItems:"center",gap:9,marginBottom:13}}><Search size={13} color={MUTED}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Buscar PDV o dirección…" style={{background:"none",border:"none",fontSize:13,flex:1}}/></div>
+      {!load&&<div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:18}}>
+        {filt.length===0&&<div style={{padding:32,textAlign:"center",color:MUTED,fontSize:13,background:"#fff",border:"1px solid "+BORDER,borderRadius:13}}>Sin entregas.</div>}
+        {filt.map((e,i)=>{const c=sc[e.status]||MUTED;return(
+          <div key={e.id||i} className="ch" style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:12,padding:"13px 16px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 1px 4px rgba(12,24,41,.04)"}}>
+            <div style={{width:38,height:38,borderRadius:10,background:c+"12",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              {e.status==="Entregado"?<CheckCircle size={16} color={c}/>:e.status==="En tránsito"?<Navigation size={16} color={c}/>:<Clock size={16} color={c}/>}
             </div>
-          );})}
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:13,marginBottom:2}}>{e.pdv}</div>
+              <div style={{fontSize:11,color:MUTED}}>{e.dir}</div>
+              {e.receptor&&<div style={{fontSize:11,color:GREEN,marginTop:2}}>✓ {e.receptor}</div>}
+            </div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4}}>
+              <Tag color={c} sm>{e.status}</Tag>
+              <span style={{fontFamily:MONO,fontSize:10,color:MUTED}}>{e.hora}</span>
+            </div>
+            <button onClick={()=>del(e.id)} className="btn" style={{color:MUTED}}><Trash2 size={12}/></button>
+          </div>
+        );})}
+      </div>}
+      <div style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:14,padding:20}}>
+        <div style={{fontFamily:DISPLAY,fontWeight:700,fontSize:14,marginBottom:14}}>Registrar entrega</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11,marginBottom:11}}>
+          <Inp label="PDV / Punto de venta *" value={form.pdv} onChange={e=>setForm({...form,pdv:e.target.value})} placeholder="Nombre del PDV"/>
+          <Inp label="Dirección" value={form.dir} onChange={e=>setForm({...form,dir:e.target.value})} placeholder="Dirección"/>
+          <Inp label="Receptor" value={form.receptor} onChange={e=>setForm({...form,receptor:e.target.value})} placeholder="¿Quién recibió?"/>
+          <Sel label="Estado" value={form.status} onChange={e=>setForm({...form,status:e.target.value})} options={["Entregado","En tránsito","Pendiente","Rechazado"]}/>
         </div>
-      )}
-      <div style={{background:"#ffffff",border:`1px solid ${T.border}`,borderRadius:16,padding:22}}>
-        <div style={{fontFamily:T.display,fontWeight:700,fontSize:15,color:T.text,marginBottom:16}}>Registrar entrega</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
-          <Input label="PDV / Punto de venta *" value={form.pdv} onChange={e=>setForm({...form,pdv:e.target.value})} placeholder="Nombre del PDV"/>
-          <Input label="Dirección" value={form.dir} onChange={e=>setForm({...form,dir:e.target.value})} placeholder="Dirección completa"/>
-          <Input label="Receptor" value={form.receptor} onChange={e=>setForm({...form,receptor:e.target.value})} placeholder="¿Quién recibió?"/>
-          <Select label="Estado" value={form.status} onChange={e=>setForm({...form,status:e.target.value})} options={["Entregado","En tránsito","Pendiente","Rechazado"]}/>
-        </div>
-        <Textarea label="Notas / Incidencias" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Observaciones, fotos pendientes, etc."/>
-        <button onClick={save} className="btn" style={{display:"flex",alignItems:"center",gap:9,background:`linear-gradient(135deg,${T.accent},#fb923c)`,color:"#fff",border:"none",borderRadius:12,padding:"12px 24px",cursor:"pointer",fontFamily:T.sans,fontWeight:700,fontSize:14,marginTop:14,boxShadow:`0 4px 20px ${T.accent}28`}}><CheckCircle size={15}/>Confirmar entrega</button>
+        <Txt label="Notas / Incidencias" value={form.notas} onChange={e=>setForm({...form,notas:e.target.value})} placeholder="Observaciones…" style={{marginBottom:11}}/>
+        <button onClick={save} className="btn" style={{display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,"+A+",#fb923c)",color:"#fff",borderRadius:11,padding:"11px 20px",fontFamily:SANS,fontWeight:700,fontSize:14,boxShadow:"0 4px 16px "+A+"28"}}><CheckCircle size={14}/>Confirmar entrega</button>
       </div>
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   ROOT APP
-═══════════════════════════════════════════════════════════════════════════ */
+/* ─── ROOT ──────────────────────────────────────────────────────────────── */
 export default function App(){
   const [view,setView]=useState("dashboard");
-  const [cotizaciones,setCotizaciones]=useState([]);
-  const [facturas,setFacturas]=useState([]);
+  const [cots,setCots]=useState([]);
+  const [facts,setFacts]=useState([]);
   const [rutas,setRutas]=useState([]);
   const [entregas,setEntregas]=useState([]);
 
   useEffect(()=>{
-    const u1=onSnapshot(collection(db,"cotizaciones"),s=>setCotizaciones(s.docs.map(d=>({id:d.id,...d.data()}))));
-    const u2=onSnapshot(collection(db,"facturas"),s=>setFacturas(s.docs.map(d=>({id:d.id,...d.data()}))));
+    const u1=onSnapshot(collection(db,"cotizaciones"),s=>setCots(s.docs.map(d=>({id:d.id,...d.data()}))));
+    const u2=onSnapshot(collection(db,"facturas"),s=>setFacts(s.docs.map(d=>({id:d.id,...d.data()}))));
     const u3=onSnapshot(collection(db,"rutas"),s=>setRutas(s.docs.map(d=>({id:d.id,...d.data()}))));
     const u4=onSnapshot(collection(db,"entregas"),s=>setEntregas(s.docs.map(d=>({id:d.id,...d.data()}))));
     return()=>{u1();u2();u3();u4();};
   },[]);
 
-  const stats={cotizaciones:cotizaciones.length,facturas:facturas.length,rutas:rutas.length};
-
   const VIEWS={
-    dashboard:<Dashboard setView={setView} cotizaciones={cotizaciones} facturas={facturas} rutas={rutas} entregas={entregas}/>,
+    dashboard:<Dashboard setView={setView} cots={cots} facts={facts} rutas={rutas} entregas={entregas}/>,
     cotizador:<Cotizador onSaved={()=>setView("dashboard")}/>,
-    rutas:<PlanificadorRutas onSaved={()=>{}}/>,
+    rutas:<PlanificadorRutas/>,
     facturas:<Facturas/>,
-    cuentas:<Clientes/>,
+    clientes:<Clientes/>,
     entregas:<Entregas/>,
   };
 
   return(
     <>
       <style>{CSS}</style>
-      <div style={{display:"flex",minHeight:"100vh",background:T.bg,color:T.text,fontFamily:T.sans}}>
-        <Sidebar view={view} setView={setView} stats={stats}/>
+      <div style={{display:"flex",minHeight:"100vh",background:"#f1f4fb",color:TEXT,fontFamily:SANS}}>
+        <Sidebar view={view} setView={setView} stats={{cot:cots.length,fac:facts.length,rut:rutas.length}}/>
         <main style={{flex:1,overflowY:"auto",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
           {VIEWS[view]||VIEWS.dashboard}
         </main>
